@@ -9,7 +9,6 @@ This project uses `uv` as the package manager and `just` as the task runner.
 **Setup:**
 ```bash
 just init          # Full setup: creates venv, syncs deps, installs pre-commit hooks
-just create_sub_venvs  # Create venvs for all plugin/example subdirectories
 ```
 
 **Development:**
