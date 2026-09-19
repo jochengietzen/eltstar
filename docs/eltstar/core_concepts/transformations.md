@@ -1,6 +1,6 @@
 # Transformations
 
-Another core concept of eltstar are transformations. Transformations use the previously define tables as inputs and generate another table as output.
+Another core concept of eltstar are transformations. Transformations use the previously defined tables as inputs and generate another table as output.
 Each transformation needs to be registered by the transformation manager "singleton".
 
 ## The simplest transformation
@@ -30,7 +30,7 @@ def foo_name_transformation( # (5)!
                 pl.col("channel_name"), 
                 pl.lit("foo"),
             ], 
-            seperator=" ",
+            separator=" ",
         ).alias("channel_name")
     )
 
@@ -44,7 +44,7 @@ def foo_name_transformation( # (5)!
 6. This is the DataFrameWrapper passed into the function (aka. transformation) that upholds your table definitions. Remember 3 lines ago? This key has to be the same as the above, so we can feed the correct parameter, when calling this transformation.
 7. You have to return a DataFrame of your engine, or a DataFrameWrapper.
 
-This is the simplest possible transformation, with an acutal change. You could also just do
+This is the simplest possible transformation, with an actual change. You could also just do
 ```python
 ...
     return tech_ch

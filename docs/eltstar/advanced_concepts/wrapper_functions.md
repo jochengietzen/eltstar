@@ -81,7 +81,7 @@ class JoinArgSpec(WrapperArgSpec):
 1. In our case we allowed an arbitrary type
 2. Usually, when joining, you need another dataframe - in our case we need another DataFrameWrapper as DataFrame to join the existing one to
 3. The left side's joining on columns
-4. The right side'S joining on columns
+4. The right side's joining on columns
 5. These operators are there to indicate, how you want to compare each pair of the left_on, right_on columns to match for the joins
 6. This indicates the type of join, as we are used to from most data frame apis
 
@@ -100,7 +100,7 @@ This will be used in our Func Spec to type the arg_spec.
 
 The actual function specification lives in the FuncSpec object.
 
-Similar to the ArgSpec the same naming convention applies to the FuncSpec. Just start with the function's name and finsih with FuncSpec.
+Similar to the ArgSpec, the same naming convention applies to the FuncSpec. Just start with the function's name and finish with FuncSpec.
 
 The FuncSpec is defined as a pydantic model, as well.
 Here we provide a bit more convenience for the model through generics:
@@ -110,8 +110,8 @@ class JoinFuncSpec(WrapperFunctionSpec[type[JoinArgSpecType]]): # (1)!
     func_name: str = "join" # (2)!
 ```
 
-1. We have to pass teh ArgSpecType's type as the WrapperFunctionSpec's generic's instantiation. It's important to provide the TypeVar/Type, so we can later use Engine Specific ArgSpec Types
-2. The func_name is required and will indicate the calling name from the DataFrameWrapper. In the same time it acts as it's identifier, which allows you, to later overwrite the function definition, if you need it.
+1. We have to pass the ArgSpecType's type as the WrapperFunctionSpec's generic's instantiation. It's important to provide the TypeVar/Type, so we can later use Engine Specific ArgSpec Types
+2. The func_name is required and will indicate the calling name from the DataFrameWrapper. At the same time it acts as its identifier, which allows you, to later overwrite the function definition, if you need it.
 
 With these Spec objects, we finished the definition steps for our function.
 You can think of these definitions as our interface for the actual function.
@@ -153,8 +153,8 @@ DataFrameWrapper.register_wrapper_function( # (9)!
 1. The polars specific join comparison operators, since we only allow equals for polars for now
 2. The polars specific join ArgSpec, since the how in Polars has a specific set of parameters, compared to e.g. pyspark.
 3. The subset of join how's that are present in polars DataFrame API
-4. We have to return a DataFrameWrapper as the return type and the only parameters can be the self (DataFrameWrapper) and the funciton_spec with our defined FunctionArgSpec in the Engine Specific definition.
-5. First we retrieve the data frames from our DataFrameWrappers
-6. First we retrieve the data frames from our DataFrameWrappers
-7. Now we perfom the actual join logic for polars, using the parameters from our arg specs
+4. We have to return a DataFrameWrapper as the return type and the only parameters can be the self (DataFrameWrapper) and the function_spec with our defined FunctionArgSpec in the Engine Specific definition.
+5. First we retrieve the data frame from our own DataFrameWrapper
+6. Then we retrieve the data frame from the other DataFrameWrapper
+7. Now we perform the actual join logic for polars, using the parameters from our arg specs
 8. Now we return the new DataFrameWrapper based on the joined DataFrame and specify our engine

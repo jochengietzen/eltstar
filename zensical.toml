@@ -47,10 +47,23 @@ repo_name = "jochengietzen/eltstar"
 # can be defined using TOML syntax.
 #
 # Read more: https://zensical.org/docs/setup/navigation/
-# nav = [
-#   { "Get started" = "index.md" },
-#   { "Markdown in 5min" = "markdown.md" },
-# ]
+nav = [
+  { "Get started" = "index.md" },
+  { "Markdown in 5min" = "markdown.md" },
+  { "eltstar" = [
+    "eltstar/README.md",
+    { "Core Concepts" = [
+      "eltstar/core_concepts/README.md",
+      "eltstar/core_concepts/model_driven.md",
+      "eltstar/core_concepts/transformations.md",
+      "eltstar/core_concepts/data_frame_wrapper.md",
+    ] },
+    { "Advanced Concepts" = [
+      "eltstar/advanced_concepts/README.md",
+      "eltstar/advanced_concepts/wrapper_functions.md",
+    ] },
+  ] },
+]
 
 # With the "extra_css" option you can add your own CSS styling to customize
 # your Zensical project according to your needs. You can add any number of

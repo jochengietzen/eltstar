@@ -3,8 +3,8 @@
 Why do we introduce a wrapper for DataFrames? 
 Aren't the individual DataFrame objects good enough? Well, yes they are, but there are reasons for it.
 
-The most obvious reason is, that we need an abstraction layer, that allows us to add any arbitrary DataFrame Library later on. At least mostly arbitraryly.
-Another reason for us is the possibility to extend the functionality of the "plain" DataFrames with things like schemaverification, casting and very importantly [wrapper_functions](../advanced%20concpets/wrapper_functions.md).
+The most obvious reason is, that we need an abstraction layer, that allows us to add any arbitrary DataFrame Library later on. At least mostly arbitrarily.
+Another reason for us is the possibility to extend the functionality of the "plain" DataFrames with things like schema verification, casting and very importantly [wrapper_functions](../advanced_concepts/wrapper_functions.md).
 
 What can you do with a DataFrameWrapper?
 Well, since it is a wrapper, of course you have direct access to your DataFrame instance via the `data_frame` attribute. This is also the only required attribute when instantiating the DataFrameWrapper. 
@@ -33,7 +33,7 @@ Referring back to the [Transformation](./transformations.md) example, we could a
                     pl.col("channel_name"), 
                     pl.lit("foo"),
                 ], 
-                seperator=" ",
+                separator=" ",
             ).alias("channel_name")
         )
     )

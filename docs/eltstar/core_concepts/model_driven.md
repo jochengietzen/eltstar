@@ -35,10 +35,10 @@ class YoutubeTablePath(TablePath):
 Let's quickly explore what is happening here:
 
 We inherit from the imported Class Table Path and define some attributes of this pydantic model, that are relevant to your table paths. Here we have a date, a time and a name.
-As the base/parent class has the abstractmehtod full_path, we need to provide an implementation for said funciton.
+As the base/parent class has the abstractmethod full_path, we need to provide an implementation for said function.
 Based on the automatically passed runtime configuration, environment configuration and the model's attributes date, time and name we can now construct the table's full path. 
 
-If you cannot imagine yet, how to use that, try to think of a postgresql or metastore, with 3 path components (e.g. db, schema and table name). You could define the db as a fixed value, the schema as part of your environemnt configuration and the table name depending on your table.
+If you cannot imagine yet, how to use that, try to think of a postgresql or metastore, with 3 path components (e.g. db, schema and table name). You could define the db as a fixed value, the schema as part of your environment configuration and the table name depending on your table.
 E.g.:
 ```python
 ...
@@ -113,12 +113,12 @@ class YoutubeTable(Table):
 ```
 
 1. This is the table path configuration from earlier.
-2. This defines the engine you use for this table. (Yes, this theoretically allows you to later mix different engines - to a certain extend.)
+2. This defines the engine you use for this table. (Yes, this theoretically allows you to later mix different engines - to a certain extent.)
 
 We now have a couple of things to unwrap in this block.
 
 - First, the latest concept with the table path - no need to reiterate for now.
-- Then we have the read and write methods defined. These depend on your engine, which is why we highly recommend to define the engine as an attribute for the class and not at instantiaton. :material-information-outline:{ title="If you want the flexibility to use the same model with various engines, you could provide multiple read/write cases (if/elif/else blocks) for the desired engines. This gives you the flexibility to set the model's engine dynamically or at instantiation time." }
+- Then we have the read and write methods defined. These depend on your engine, which is why we highly recommend to define the engine as an attribute for the class and not at instantiation. :material-information-outline:{ title="If you want the flexibility to use the same model with various engines, you could provide multiple read/write cases (if/elif/else blocks) for the desired engines. This gives you the flexibility to set the model's engine dynamically or at instantiation time." }
 
 
 ## Table instances
@@ -197,7 +197,7 @@ tech_channels = YoutubeTable(
 
 **Careful!** Why do we define the name twice? 
 Once as a key and once as the Column's attribute `name`?<br/>
-Often times we deal with external systems we need to read from, sometimes even write to. In these cases, we often encounter different naming conventions, that might even be illeagal in our context :material-asterisk:{ title="e.g. an api might allow spaces in the column names, but our engine might not allow that; or we have a system with all lower case names and the source system uses CascalCasing" }. This is the reason, we define 2 names for the columns. 
+Often times we deal with external systems we need to read from, sometimes even write to. In these cases, we often encounter different naming conventions, that might even be illegal in our context :material-asterisk:{ title="e.g. an api might allow spaces in the column names, but our engine might not allow that; or we have a system with all lower case names and the source system uses PascalCasing" }. This is the reason, we define 2 names for the columns. 
 
 Note, that the keys are the names we will use in the system running the engine.
 
