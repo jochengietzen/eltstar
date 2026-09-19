@@ -13,7 +13,7 @@ A few of the biggest issues we try to solve using this library. Some of them bei
 - We are tired of choosing spark over e.g. polars to be future proof, while we deal with industries that are likely never going to hit any rates, that justify the sledgehammer to crack the few tens to hundreds of Gigabytes found in a large portion of industries.
 - The landscape of data engineering is growing and growing - for better AND for worse. Keeping an overview of every way to model your pipelines and the damn boilerplate that happens in every system or vendor is unnecessary repetition and a perfect source to introduce bugs.
 - The lack of testing in elt/etl products is shocking. But we understand why - it can be hard. We won't be able to solve everything here, but we tackle a lot in that area.
-- Additionally to your data frame library, you need to get into details for testing and data quality checks.
+- Additionally to your data frame library, you need to get into details for testing and data quality checks. Usually solved by specific tools you need to learn. We try to improve in this area, too.
 
 The list can easily be continued, but these were the most mentionable for our case.
 
