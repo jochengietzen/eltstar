@@ -65,6 +65,5 @@ class JoinArgSpec(WrapperArgSpec):
 JoinArgSpecType = TypeVar("JoinArgSpecType", bound=JoinArgSpec)  # pylint: disable=invalid-name
 
 
-class JoinFuncSpec(WrapperFunctionSpec):
+class JoinFuncSpec(WrapperFunctionSpec[type[JoinArgSpecType]]):
     func_name: str = "join"
-    arg_spec: type[JoinArgSpecType]  # type: ignore # TODO: try to find proper way to handle pydantic and mypy
