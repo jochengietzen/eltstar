@@ -158,3 +158,58 @@ DataFrameWrapper.register_wrapper_function( # (9)!
 6. Then we retrieve the data frame from the other DataFrameWrapper
 7. Now we perform the actual join logic for polars, using the parameters from our arg specs
 8. Now we return the new DataFrameWrapper based on the joined DataFrame and specify our engine
+9. Now we register the function to our DataFrameWrapper
+10. We have to indicate, the Engine this function is registered for
+11. We have to pass the func spec. Careful, we use the JoinFuncSpec from the general definition, but the PolarsJoinArgSpec from our specific ArgSpec definition
+12. Lastly, we need to pass the actual function
+
+### Entrypoint for us to find the function
+
+If you define these functions, it is very important to give us a hint, where we can find this registration, or it won't be loaded.
+You can do this in your pyproject.toml using the entrypoint group `"eltstar.wrapper_functions"`.
+Every registration of a wrapper_function, that you list in your entry-points group with this name, will be automatically found by eltstar.
+
+```toml
+[project.entry-points."eltstar.wrapper_functions"]
+join = "eltstar_engine_polars.functions.join" # (1)!
+```
+1. The join key on the left side is irrelevant for us. We like to name it the same as our function and module, but the key is not used by us.
+
+### Usage
+
+Now that you have defined the functions, or installed a plugin that provides these definitions and/or implementations, you can use them, as you would usually with a DataFrame, just on the DataFrameWrapper.
+
+One last thing to mention, before we actually use this.
+We provide 2 DataFrameWrappers in 2 modules.
+1. `from eltstar.models.data_frame_wrapper.wrapper import DataFrameWrapper`
+    - This is the plain DataFrameWrapper class definition.
+    - If you only use this one, you will need to call the classfunction `DataFrameWrapper.load_all_plugins()` before any wrapper_function usage.
+2. `from eltstar.models.data_frame_wrapper.preloaded_wrapper import DataFrameWrapper`
+    - This convenience class is the exact same as in case 1 but the plugins are already loaded for you.
+    - Important: This should not be the Wrapper you use for your own registrations and entrypoints, since the registration itself does not load/apply the function. Only the load step will apply the function to the DataFrameWrapper class.
+
+
+Using the wrapper function is as simple as calling:
+
+```python
+from eltstar.models.data_frame_wrapper.preloaded_wrapper import DataFrameWrapper # (1)!
+df_w1: DataFrameWrapper = ...
+df_w2: DataFrameWrapper = ...
+joined_wrapper = df_w1.join(
+        function_spec=PolarsJoinArgSpec( # (2)!
+            other=df_w2, # (3)!
+            left_on=["id_1", "id_2"], # (4)!
+            right_on=["id_1", "id_2"], # (5)!
+            how="inner", # (6)!
+        ),
+    )
+print(joined_wrapper.data_frame)
+```
+1. As mentioned above, we should use the preloaded DataFrameWrapper for usage here - especially if this is a transformation
+2. We use the engine specific Arg Spec in this case, but if you specified the specific ArgSpec as recommended to only be a subset of the general ArgSpec, you should use the general ArgSpec, so that you don't have to change anything to switch between engines
+3. The second DataFrameWrapper to join to the first one
+4. The left side on columnse
+5. The right side on columnse
+6. The type of our join
+
+And all our arguments are automatically typed and type checked when calling the function. All thanks to the utilisation of pydantic for our args.

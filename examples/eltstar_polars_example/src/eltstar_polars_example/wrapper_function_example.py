@@ -1,3 +1,4 @@
+from eltstar_engine_polars.functions.join import PolarsJoinArgSpec
 import polars as pl
 from eltstar_engine_polars.engine import PolarsEngine
 
@@ -35,6 +36,6 @@ if __name__ == "__main__":
 
     print(
         df_w1.join(
-            function_spec=JoinArgSpec(other=df_w2, left_on=["id_1", "id_2"], right_on=["id_1", "id_2"], how="inner"),
+            function_spec=PolarsJoinArgSpec(other=df_w2, left_on=["id_1", "id_2"], right_on=["id_1", "id_2"], how="inner"),
         ).data_frame
     )
