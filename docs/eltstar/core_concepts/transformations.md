@@ -53,3 +53,7 @@ which of course is even simpler, but rarely has a point, unless you keep various
 
 We have briefly seen another important concept in eltstar - the [DataFrameWrapper](./data_frame_wrapper.md). For more details on that, follow the link.
 
+<!---aigen_start-->
+Registering a transformation doesn't run it, though. For how to actually load configuration and execute your registered transformations, continue with [Running a pipeline](./running_a_pipeline.md).
+<!---aigen_end-->
+

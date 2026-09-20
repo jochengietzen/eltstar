@@ -204,4 +204,24 @@ Note, that the keys are the names we will use in the system running the engine.
 
 Since the individual Column objects are instances, you can obviously reuse them in several table definitions.
 
+<!---aigen_start-->
+## Built-in data types
+
+`data_type=StringType()` and `data_type=IntegerType()` are only two of the `DataType`s that ship with eltstar (in `eltstar.models.base`):
+
+| Class | Example Python value |
+| --- | --- |
+| `StringType` | `"example"` |
+| `IntegerType` | `1` |
+| `FloatType` | `1.1` |
+| `BooleanType` | `True` |
+| `DateType` | `datetime.date(2024, 1, 1)` |
+| `TimestampTypeSecondsNTZ` | `datetime.datetime(2024, 1, 1)` (no timezone) |
+| `TimestampTypeSecondsUTC` | `datetime.datetime(2024, 1, 1, tzinfo=UTC)` |
+| `BinaryType` | `b"example"` |
+| `DecimalType28` | `decimal.Decimal(1)` (precision 28, scale 0) |
+| `UUIDType` | a `uuid.UUID` |
+
+Two `DataType`s are considered equal if their `identifier` matches, regardless of which instance you use - this is what lets `Schema.equals` compare a table's expected schema against an actual one. Whether a given type is actually usable depends on your [engine](../advanced_concepts/engines.md) having registered a mapping for it; not every engine necessarily supports every type above.
+<!---aigen_end-->
 
