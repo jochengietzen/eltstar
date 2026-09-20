@@ -57,10 +57,16 @@ nav = [
       "eltstar/core_concepts/model_driven.md",
       "eltstar/core_concepts/transformations.md",
       "eltstar/core_concepts/data_frame_wrapper.md",
+      "eltstar/core_concepts/configuration.md",
+      "eltstar/core_concepts/running_a_pipeline.md",
     ] },
     { "Advanced Concepts" = [
       "eltstar/advanced_concepts/README.md",
       "eltstar/advanced_concepts/wrapper_functions.md",
+      "eltstar/advanced_concepts/engines.md",
+      "eltstar/advanced_concepts/lineage.md",
+      "eltstar/advanced_concepts/testing_and_fake_data.md",
+      "eltstar/advanced_concepts/runtime_systems.md",
     ] },
   ] },
 ]

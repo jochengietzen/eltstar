@@ -152,10 +152,13 @@ class TransformationManager:
         self,
         output_table_model: Table,
         name_: str | None = None,
+        graph_label: str = "default",
         **kwargs: Any,
     ) -> Callable:
         """aigen_start
         Decorator factory that registers a function as a named transformation with its input/output table models.
+        `graph_label` is forwarded to the resulting Transformation, so several independent pipelines registered
+        on the same manager can be told apart in the lineage graph.
         aigen_end"""
 
         def decorator(func: Callable) -> Callable:
@@ -236,6 +239,7 @@ class TransformationManager:
                 output_table_model=output_table_model,
                 runtime_config=self._runtime_config,
                 environment_config=self._environment_config,
+                graph_label=graph_label,
             )
 
             self._registered_transformations[func_name] = transformation
@@ -256,7 +260,6 @@ class TransformationManager:
         aigen_end"""
         plugin_groups = [
             "eltstar.engines",
-            "eltstar.conversions",
             "eltstar.runtime_systems",
         ]
         for group in plugin_groups:
@@ -267,13 +270,14 @@ class TransformationManager:
 
     def execute_all_transformations(self) -> None:
         """aigen_start
-        Execute every registered transformation and write its output table.
+        Execute every registered transformation, in lineage dependency order, and write its output table.
         aigen_end"""
         self._check_initialization_state()
         runtime_config: RuntimeConfig = self._runtime_config  # type: ignore
         environment_config: EnvironmentConfig = self._environment_config  # type: ignore
-        for t_name, transformation in self._registered_transformations.items():
-            logger.info("Executing function %s", t_name)
+        for element in self.lineage.iter_transformations():
+            logger.info("Executing function %s", element.name)
+            transformation = element.transformation
             result = transformation.execute()
             result_model = transformation.output_table_model
             result_model.write(
