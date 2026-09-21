@@ -7,13 +7,12 @@ That's what the `eltstar.runtime_system` module is for: a small extension point 
 
 ## The interface
 
-```python
-from eltstar.runtime_system.base import BaseRuntimeSystem
+```python title="src/eltstar/runtime_system/base.py"
+from abc import abstractmethod
+
 from eltstar.graph import Lineage
 
-class MyRuntimeSystem(BaseRuntimeSystem):
-    def generate(self, lineage: Lineage, source_table_type: type | None = None) -> None:
-        ...
+--8<-- "src/eltstar/runtime_system/base.py:runtime-system-interface"
 ```
 
 `generate` is handed the full `Lineage` for your pipeline (see [Lineage](./lineage.md) for what you can pull out of it - source/sink tables, topological transformation order, dependency edges) and is expected to turn that into whatever your target system needs: job definitions, a DAG file, an asset bundle, ...
@@ -24,13 +23,12 @@ class MyRuntimeSystem(BaseRuntimeSystem):
 
 `plugins/runtime_systems/databricks/asset_bundle_jobs` is the reference implementation:
 
-```python
-class DatabricksAssetBundleJobRS(BaseRuntimeSystem):
-    def generate(self, lineage: Lineage, source_table_type: type | None = None) -> None:
-        source_tables = lineage.iter_source_tables(source_table_type=source_table_type)
-        sink_tables = lineage.iter_sink_tables()
-        transformations = lineage.iter_transformations()
-        ...
+```python title="plugins/runtime_systems/databricks/asset_bundle_jobs/src/eltstar_rs_dbx_asset_bundle_jobs/runtime_system.py"
+from eltstar.graph import Lineage
+from eltstar.logging import logger
+from eltstar.runtime_system.base import BaseRuntimeSystem
+
+--8<-- "plugins/runtime_systems/databricks/asset_bundle_jobs/src/eltstar_rs_dbx_asset_bundle_jobs/runtime_system.py:databricks-rs-example"
 ```
 
 **Careful!** As of now, this plugin only logs what it *would* generate - walking the lineage and printing source tables, sink tables and transformation dependency order. It does not yet write actual Databricks Asset Bundle job YAML. Treat it as a working example of how to consume a `Lineage` inside a `BaseRuntimeSystem`, not as a ready-to-deploy integration.
@@ -47,10 +45,10 @@ If you want to generate artifacts for a different runtime system (Airflow, Dagst
 
 `TransformationManager.load_all_plugins()` scans an `eltstar.runtime_systems` entry-point group, mirroring `eltstar.engines` (see [Engines - Discovery, honestly](./engines.md#discovery-honestly)). As of now, `eltstar-rs-dbx-asset-bundle-jobs` doesn't declare that entry point either - you currently wire up a runtime system by importing and instantiating it yourself:
 
-```python
+```python title="examples/eltstar_polars_example/src/eltstar_polars_example/main_polars_example.py"
 from eltstar_rs_dbx_asset_bundle_jobs.runtime_system import DatabricksAssetBundleJobRS
 
-DatabricksAssetBundleJobRS().generate(lineage=manager.lineage)
+--8<-- "examples/eltstar_polars_example/src/eltstar_polars_example/main_polars_example.py:rs-usage"
 ```
 
 This part of eltstar is intentionally minimal for now - `tbc`, in the spirit of the rest of this documentation.

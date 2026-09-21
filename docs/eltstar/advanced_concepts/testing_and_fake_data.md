@@ -20,19 +20,19 @@ This page covers what actually happens when you ask eltstar to generate data for
 
 ## Generating data for a table
 
-```python
+```python title="examples/eltstar_minimal_example/src/eltstar_minimal_example/main.py"
 from eltstar.testing.faker_manager import FakerManager
 from eltstar_engine_polars.engine import PolarsEngine
 
-fake_channels = FakerManager().generate(table=tech_channels, engine=PolarsEngine(), n_values=20) # (1)!
+--8<-- "examples/eltstar_minimal_example/src/eltstar_minimal_example/main.py:faker-generate"
 ```
 
 1. This returns a `DataFrameWrapper` with `n_values` rows, one fake value per row for every column that has a `generation` set. Columns without a `generation` are simply left out of the result - eltstar can't invent a strategy for you.
 
 The result is engine aware (backed by `engine.dataframe_from_faker_columnar`), so you can write it straight to a table the same way you'd write any other `DataFrameWrapper`:
 
-```python
-tech_channels.write(runtime_config=..., environment_config=..., data_frame_wrapper=fake_channels)
+```python title="examples/eltstar_minimal_example/src/eltstar_minimal_example/main.py"
+--8<-- "examples/eltstar_minimal_example/src/eltstar_minimal_example/main.py:faker-write"
 ```
 
 This is exactly the pattern used to seed local/test data before running transformations against it - see the [minimal example](https://github.com/jochengietzen/eltstar/tree/main/examples/eltstar_minimal_example) for a fully worked-through pipeline that does this end to end.
@@ -72,29 +72,25 @@ Without a `generation_id`, every value is generated completely independently - f
 
 ## Using this in `pytest`
 
-`eltstar.testing.utils.parametrize_for_tests` turns every currently registered transformation into a `pytest` parameter, complete with a `GenerateFixture` per input table:
+`eltstar.testing.utils.parametrize_for_tests` turns every currently registered transformation into a `pytest` parameter, complete with a `GenerateFixture` per input table. The [polars example](https://github.com/jochengietzen/eltstar/tree/main/examples/eltstar_polars_example)'s whole test suite is built on exactly this:
 
-```python
+```python title="examples/eltstar_polars_example/tests/test_all_transformations.py"
 import pytest
-from eltstar.testing.utils import parametrize_for_tests
-from eltstar.transformation import manager
+from eltstar_polars_example.manager import manager
 
-@pytest.mark.parametrize(
-    "case",
-    list(parametrize_for_tests(manager)), # (1)!
-    ids=lambda case: case.name,
-)
-def test_transformation_smoke(case, faker_manager, engine):
-    inputs = {
-        name: fixture(faker_manager=faker_manager, engine=engine) # (2)!
-        for name, fixture in case.input_models.items()
-    }
-    result = case.transformation.func(**inputs)
-    # assert whatever schema/shape guarantees matter to you
+from eltstar.testing.utils import parametrize_for_tests
+
+--8<-- "examples/eltstar_polars_example/tests/test_all_transformations.py:parametrize-for-tests"
 ```
 
-1. Each `case` is a `ParameterizedTest(name, transformation, input_models)` - one per registered transformation.
-2. Calling a `GenerateFixture` (via `fixture(faker_manager=..., engine=..., n_values=100)`) generates schema-valid fake data for that specific input table, using the same `FakerManager.generate` shown above.
+The `faker_manager`/`engine` fixtures it depends on live in [`conftest.py`](https://github.com/jochengietzen/eltstar/tree/main/examples/eltstar_polars_example/tests/conftest.py) next to it:
+
+```python title="examples/eltstar_polars_example/tests/conftest.py"
+--8<-- "examples/eltstar_polars_example/tests/conftest.py"
+```
+
+1. `parameter` is a `ParameterizedTest(name, transformation, input_models)` - one per registered transformation.
+2. Calling a `GenerateFixture` (via `generate(faker_manager=..., engine=..., n_values=100)`) generates schema-valid fake data for that specific input table, using the same `FakerManager.generate` shown above.
 
 This gives you a smoke test for every transformation in your pipeline - "does this function run at all against schema-valid input" - without hand-writing fixtures per transformation. It won't catch business-logic bugs, but it reliably catches the kind of breakage a refactor introduces (renamed columns, changed types, a transformation that was never updated after its input table changed).
 <!---aigen_end-->

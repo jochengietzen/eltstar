@@ -22,8 +22,12 @@ eltstar = { workspace = true }
 [project.scripts]
 eltstar-engine-polars = "eltstar_engine_polars:main"
 
+# aigen_start
+# --8<-- [start:join-entrypoint]
 [project.entry-points."eltstar.wrapper_functions"]
-join = "eltstar_engine_polars.functions.join"
+join = "eltstar_engine_polars.functions.join" # (1)!
+# --8<-- [end:join-entrypoint]
+# aigen_end
 
 
 [tool.uv.build-backend]

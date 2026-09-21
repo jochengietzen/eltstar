@@ -25,9 +25,13 @@ def polars_frame(frame: Any) -> TypeGuard[pl.DataFrame]:
     return isinstance(frame, pl.DataFrame)
 
 
+### aigen_start
+# --8<-- [start:engine-attrs]
 class PolarsEngine(Engine):
-    engine_identifier: ClassVar[str] = "polars"
-    internal_schema_type: ClassVar[type[pl.Schema]] = pl.Schema
+    engine_identifier: ClassVar[str] = "polars"  # (1)!
+    internal_schema_type: ClassVar[type[pl.Schema]] = pl.Schema  # (2)!
+# --8<-- [end:engine-attrs]
+### aigen_end
 
     @classmethod
     def _from_engine_schema(cls, schema: Any) -> Schema:
@@ -98,7 +102,9 @@ class PolarsEngine(Engine):
 
     @classmethod
     def setup(cls):
-        Schema.register_from_engine_schema(
+        ### aigen_start
+        # --8<-- [start:engine-setup-excerpt]
+        Schema.register_from_engine_schema(  # (3)!
             engine_identifier=cls.engine_identifier,
             engine_schema_type=cls.internal_schema_type,
             from_method=cls._from_engine_schema,
@@ -110,12 +116,14 @@ class PolarsEngine(Engine):
         )
         cls.register_data_type(
             data_type=FloatType(),
-            engine_type=pl.Float64,
+            engine_type=pl.Float64,  # (4)!
         )
         cls.register_data_type(
             data_type=StringType(),
-            engine_type=EngineSpecificDataType(dtype_class=pl.String),
+            engine_type=EngineSpecificDataType(dtype_class=pl.String),  # (5)!
         )
+        # --8<-- [end:engine-setup-excerpt]
+        ### aigen_end
         cls.register_data_type(
             data_type=BooleanType(),
             engine_type=EngineSpecificDataType(dtype_class=pl.Boolean),
@@ -159,4 +167,8 @@ class PolarsEngine(Engine):
         )
 
 
-PolarsEngine.setup()
+### aigen_start
+# --8<-- [start:engine-setup-call]
+PolarsEngine.setup()  # (6)!
+# --8<-- [end:engine-setup-call]
+### aigen_end

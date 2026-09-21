@@ -48,17 +48,16 @@ We mentioned schema verification and casting earlier as one of the reasons for t
 
 If you construct a `DataFrameWrapper` with both a `schema` and an `engine`, you can ask it whether the data frame it holds actually matches that schema:
 
-```python
-dfw = DataFrameWrapper(data_frame=df, schema=tech_channels.get_schema(), engine=PolarsEngine)
-dfw.verify_schema(raise_on_mismatch=True) # (1)!
+```python title="examples/eltstar_polars_example/src/eltstar_polars_example/example_verify_schema.py"
+--8<-- "examples/eltstar_polars_example/src/eltstar_polars_example/example_verify_schema.py:verify-schema"
 ```
 
 1. Returns `True`/`False` by default; pass `raise_on_mismatch=True` to instead raise a `SchemaVerificationError` with both schemas printed, which tends to be more useful while debugging than a bare boolean. You can also pass `auto_verify_schema_if_given=True` to the constructor to run this check immediately on instantiation.
 
 If you'd rather fix the mismatch than fail on it (e.g. a source system that reports `channel_id` as an `int` but your schema wants a `str`), `cast()` does that for you, using the schema already attached to the wrapper:
 
-```python
-dfw = dfw.cast() # (1)!
+```python title="examples/eltstar_polars_example/src/eltstar_polars_example/casting_example.py"
+--8<-- "examples/eltstar_polars_example/src/eltstar_polars_example/casting_example.py:cast"
 ```
 
 1. Delegates to `engine.cast(schema=self.schema, data_frame_wrapper=self)`, so casting behaviour ultimately comes from the engine (see [Engines](../advanced_concepts/engines.md)) - polars casts differently than pandas would, but the eltstar-level call looks identical either way. This is also what `Table.validate_table_schema` and the automatic input-casting in [transformation execution](./running_a_pipeline.md#4-execute) use under the hood.

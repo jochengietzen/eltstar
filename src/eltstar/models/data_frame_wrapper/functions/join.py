@@ -9,6 +9,8 @@ if TYPE_CHECKING:
     from eltstar.models.data_frame_wrapper.wrapper import DataFrameWrapper
 
 
+### aigen_start
+# --8<-- [start:join-arg-spec]
 class JoinComparisonOperator(StrEnum):
     EQUAL = auto()
     NOT_EQUAL = auto()
@@ -19,13 +21,13 @@ class JoinComparisonOperator(StrEnum):
 
 
 class JoinArgSpec(WrapperArgSpec):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True)  # (1)!
 
-    other: "DataFrameWrapper"
-    left_on: list[str]
-    right_on: list[str]
-    operator_list: list[JoinComparisonOperator]
-    how: Literal[
+    other: "DataFrameWrapper"  # (2)!
+    left_on: list[str]  # (3)!
+    right_on: list[str]  # (4)!
+    operator_list: list[JoinComparisonOperator]  # (5)!
+    how: Literal[  # (6)!
         "inner",
         "left",
         "right",
@@ -40,6 +42,8 @@ class JoinArgSpec(WrapperArgSpec):
         "left_semi",
         "left_anti",
     ]
+    # --8<-- [end:join-arg-spec]
+    ### aigen_end
 
     @model_validator(mode="before")
     @classmethod
@@ -62,8 +66,18 @@ class JoinArgSpec(WrapperArgSpec):
         return values
 
 
+### aigen_start
+# --8<-- [start:join-arg-spec-type]
 JoinArgSpecType = TypeVar("JoinArgSpecType", bound=JoinArgSpec)  # pylint: disable=invalid-name
+# --8<-- [end:join-arg-spec-type]
+### aigen_end
 
 
-class JoinFuncSpec(WrapperFunctionSpec[type[JoinArgSpecType]]):
-    func_name: str = "join"
+### aigen_start
+# --8<-- [start:join-func-spec]
+class JoinFuncSpec(WrapperFunctionSpec[type[JoinArgSpecType]]):  # (1)!
+    func_name: str = "join"  # (2)!
+
+
+# --8<-- [end:join-func-spec]
+### aigen_end

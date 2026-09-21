@@ -113,25 +113,35 @@ if __name__ == "__main__":
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     # 5. RuntimeConfig/EnvironmentConfig: eltstar's registration-based config loading.
+    # --8<-- [start:config-registration]
     RuntimeConfig.register_load_method("local", RuntimeConfig)
     EnvironmentConfig.register_load_method("local", lambda: EnvironmentConfig(env="local"))
     manager.load_runtime_config(runtime_class_type=RuntimeConfig, situation_identifier="local")
     manager.load_environment_config(environment_class_type=EnvironmentConfig, situation_identifier="local")
+    # --8<-- [end:config-registration]
 
     runtime_config = RuntimeConfig()
     environment_config = EnvironmentConfig(env="local")
 
     # 6. Generate schema-valid fake data and write it, standing in for a real ingestion step.
-    fake_people = FakerManager().generate(table=people, engine=PolarsEngine(), n_values=20)
+    # --8<-- [start:faker-generate]
+    fake_people = FakerManager().generate(table=people, engine=PolarsEngine(), n_values=20)  # (1)!
+    # --8<-- [end:faker-generate]
+    # --8<-- [start:faker-write]
     people.write(runtime_config=runtime_config, environment_config=environment_config, data_frame_wrapper=fake_people)
+    # --8<-- [end:faker-write]
 
     # 7. Execute every registered transformation and write its output: reads `people`, casts it
     #    to the schema, calls filter_adults(), then writes the result to the `adults` table.
+    # --8<-- [start:execute]
     manager.execute_all_transformations()
+    # --8<-- [end:execute]
 
     # 8. Round-trip: read the written output back from disk.
     print(adults.read(runtime_config=runtime_config, environment_config=environment_config).data_frame)
 
     # Bonus: eltstar tracks lineage across registered transformations for free.
+    # --8<-- [start:lineage-edges]
     print(manager.lineage.graph.edges)
+    # --8<-- [end:lineage-edges]
 ### aigen_end
