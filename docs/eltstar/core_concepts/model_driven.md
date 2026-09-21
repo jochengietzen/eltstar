@@ -13,24 +13,14 @@ Let's take a closer look into the youtube example.
 
 ## TablePath
 
-```python
-from eltstar.models.base import TablePath
+<!---aigen_start-->
+```python title="examples/eltstar_polars_example/src/eltstar_polars_example/models/youtube.py"
 from eltstar.config import EnvironmentConfig, RuntimeConfig
+from eltstar.models.table_path import TablePath
 
-class YoutubeTablePath(TablePath):
-    date: str
-    time: str
-    name: str
-
-    def full_path(
-        self,
-        *args: Any,
-        runtime_config: RuntimeConfig,
-        environment_config: MyEnvironmentConfig,
-        **kwargs: dict[str, Any],
-    ) -> str:
-        return f"/workspace/data/{environment_config.env}/{self.name}_{self.date}_{self.time}.csv"
+--8<-- "examples/eltstar_polars_example/src/eltstar_polars_example/models/youtube.py:table-path"
 ```
+<!---aigen_end-->
 
 Let's quickly explore what is happening here:
 
@@ -69,48 +59,19 @@ Now that we have a table path, we can continue with the definition of our System
 
 This class has a few more necessities and has to inherit from the class Table.
 
-```python
-from eltstar.models.table import Table
-from eltstar.engines.base import EngineType
+<!---aigen_start-->
+```python title="examples/eltstar_polars_example/src/eltstar_polars_example/models/youtube.py"
+import polars as pl
 from eltstar_engine_polars.engine import PolarsEngine
+
 from eltstar.config import EnvironmentConfig, RuntimeConfig
+from eltstar.engines.base import EngineType
 from eltstar.models.data_frame_wrapper import DataFrameWrapper
+from eltstar.models.table import Table
 
-class YoutubeTable(Table):
-    path: YoutubeTablePath # (1)!
-    engine: type[EngineType] = PolarsEngine # (2)!
-
-    def read(
-        self,
-        *args,
-        runtime_config: RuntimeConfig,
-        environment_config: EnvironmentConfig,
-        **kwargs,
-    ) -> DataFrameWrapper:
-        return DataFrameWrapper(
-            data_frame=pl.read_csv(
-                *args,
-                source=self.path.full_path(runtime_config=runtime_config, environment_config=environment_config),
-                **kwargs,
-            ),
-            schema=self.get_schema(),
-            engine=self.engine,
-        )
-
-    def write(
-        self,
-        *args,
-        runtime_config: RuntimeConfig,
-        environment_config: EnvironmentConfig,
-        data_frame_wrapper: DataFrameWrapper,
-        **kwargs,
-    ) -> "YoutubeTable":
-        return data_frame_wrapper.data_frame.write_csv(
-            *args,
-            file=self.path.full_path(runtime_config=runtime_config, environment_config=environment_config),
-            **kwargs,
-        )
+--8<-- "examples/eltstar_polars_example/src/eltstar_polars_example/models/youtube.py:table"
 ```
+<!---aigen_end-->
 
 1. This is the table path configuration from earlier.
 2. This defines the engine you use for this table. (Yes, this theoretically allows you to later mix different engines - to a certain extent.)
@@ -125,66 +86,13 @@ We now have a couple of things to unwrap in this block.
 
 After we have the basics in definition out of the way, we can now write our actual table instances.
 
-```python
-tech_channels = YoutubeTable(
-    path=YoutubeTablePath(
-        name="youtube_tech_channels", # (1)!
-        date="20251120",
-        time="133753",
-    ),
-    columns=Columns( # (2)!
-        root=dict(
-            channel_id=Column( # (3)!
-                name="channel_id", #(4)!
-                data_type=StringType(), # (5)!
-                is_primary_key=True, # (6)!
-                generation=Generation(faker_type=FakerStringType()), # (7)!
-            ),
-            channel_name=Column(
-                name="channel_name",
-                data_type=StringType(),
-                generation=Generation(faker_type=FakerStringType()),
-            ),
-            description=Column(
-                name="description",
-                data_type=StringType(),
-                generation=Generation(faker_type=FakerStringType()),
-            ),
-            subscribers=Column(
-                name="subscribers",
-                data_type=IntegerType(),
-                generation=Generation(faker_type=FakerIntType(min_val=10, max_val=100)),
-            ),
-            total_views=Column(
-                name="total_views",
-                data_type=IntegerType(),
-                generation=Generation(faker_type=FakerIntType(min_val=10, max_val=100)),
-            ),
-            total_videos=Column(
-                name="total_videos",
-                data_type=IntegerType(),
-                generation=Generation(faker_type=FakerIntType(min_val=10, max_val=100)),
-            ),
-            created_date=Column(
-                name="created_date",
-                data_type=StringType(),
-                generation=Generation(faker_type=FakerStringType()),
-            ),
-            country=Column(
-                name="country",
-                data_type=StringType(),
-                generation=Generation(faker_type=FakerStringType()),
-            ),
-            scraped_at=Column(
-                name="scraped_at",
-                data_type=StringType(),
-                generation=Generation(faker_type=FakerStringType()),
-            ),
-        )
-    ),
-    description="Youtube tech channels",
-)
+<!---aigen_start-->
+`ReadTable` here is just a thin `YoutubeTable` subclass with no extra behaviour, used elsewhere in the example to distinguish read-only usages; for this walkthrough you can treat it exactly like `YoutubeTable`.
+
+```python title="examples/eltstar_polars_example/src/eltstar_polars_example/models/youtube.py"
+--8<-- "examples/eltstar_polars_example/src/eltstar_polars_example/models/youtube.py:tech-channels"
 ```
+<!---aigen_end-->
 
 1. We remember the path definition from earlier. Here we see, how we actually use the TablePath object. The name is the actual name (prefix) of the csv we use in this example.
 2. Now we get to the Column definition. Columns is a RootModel of a dictionary that builds from names (strings) to Column objects. This is the basis for all Schema related things.

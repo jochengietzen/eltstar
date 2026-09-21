@@ -41,13 +41,13 @@ This indirection is what allows the exact same table and transformation code to 
 
 ## Wiring it into the transformation manager
 
-You don't usually call `.load()` yourself. Instead, you hand the class type to the [`manager`](./running_a_pipeline.md), which loads it once and propagates it to every registered transformation:
+You don't usually call `.load()` yourself. Instead, you hand the class type to the [`manager`](./running_a_pipeline.md), which loads it once and propagates it to every registered transformation. Here's the complete registration-and-wiring pattern, straight from the [minimal example](https://github.com/jochengietzen/eltstar/tree/main/examples/eltstar_minimal_example):
 
-```python
+```python title="examples/eltstar_minimal_example/src/eltstar_minimal_example/main.py"
+from eltstar.config import EnvironmentConfig, RuntimeConfig
 from eltstar.transformation import manager
 
-manager.load_runtime_config(runtime_class_type=MyRuntimeConfig, situation_identifier="local")
-manager.load_environment_config(environment_class_type=MyEnvironmentConfig, situation_identifier="local")
+--8<-- "examples/eltstar_minimal_example/src/eltstar_minimal_example/main.py:config-registration"
 ```
 
 For the full picture of how this fits into actually running your pipeline, continue with [Running a pipeline](./running_a_pipeline.md).

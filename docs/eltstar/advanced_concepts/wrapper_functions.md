@@ -16,26 +16,14 @@ To ensure, that your logic produces consistent results, we provide some testing 
 
 These functions are executed on a given DataFrameWrapper, meaning you can utilise them like you would with a traditional DataFrame API.
 
-```python
+<!---aigen_start-->
+```python title="examples/eltstar_add_function_to_multiple_engines_example/tests/test_ordered_duplication.py"
 from eltstar.testing.wrapper_functions import compare_wrapper_functions_accross_engines
 
 def test_ordered_duplication_function(test_df):
-    compare_wrapper_functions_accross_engines(
-            dfw=test_df,
-            engine_func_spec_lookup={
-                PolarsEngine: Polars<SomeName>ArgSpec(<some_arguments>),
-                PandasEngine: Pandas<SomeName>ArgSpec(<some_arguments>),
-            },
-            func_identifier="some_name_identifier",
-            expected_result_schema=Schema(
-                root=[
-                    SchemaField(name="foo", type_=IntegerType(), nullable=False),
-                    SchemaField(name="bar", type_=FloatType(), nullable=False),
-                    SchemaField(name="index_column", type_=IntegerType(), nullable=False),
-                ]
-            ),
-        )
+    --8<-- "examples/eltstar_add_function_to_multiple_engines_example/tests/test_ordered_duplication.py:compare-across-engines"
 ```
+<!---aigen_end-->
 
 But how do you define a wrapper function?
 Let's explore it, using the example of the provided join function.
@@ -54,29 +42,13 @@ The ArgSpec definition is a pydantic model/class that inherits from WrapperArgSp
 
 The naming convention is to name it starting with your function's name and then adding the suffix ArgSpec. In our example it would be `JoinArgSpec`
 
-For the join's ArgSpec, we used the following partial code:
+For the join's ArgSpec, we used the following code:
 
-```python
-class JoinComparisonOperator(StrEnum):
-    EQUAL = auto()
-    NOT_EQUAL = auto()
-    ...
-
-class JoinArgSpec(WrapperArgSpec):
-    model_config = ConfigDict(arbitrary_types_allowed=True) # (1)!
-
-    other: "DataFrameWrapper" # (2)!
-    left_on: list[str] # (3)!
-    right_on: list[str] # (4)!
-    operator_list: list[JoinComparisonOperator] # (5)! 
-    how: Literal[
-        "inner",
-        "left",
-        ...
-    ] # (6)!
-
-    ...
+<!---aigen_start-->
+```python title="src/eltstar/models/data_frame_wrapper/functions/join.py"
+--8<-- "src/eltstar/models/data_frame_wrapper/functions/join.py:join-arg-spec"
 ```
+<!---aigen_end-->
 
 1. In our case we allowed an arbitrary type
 2. Usually, when joining, you need another dataframe - in our case we need another DataFrameWrapper as DataFrame to join the existing one to
@@ -85,14 +57,18 @@ class JoinArgSpec(WrapperArgSpec):
 5. These operators are there to indicate, how you want to compare each pair of the left_on, right_on columns to match for the joins
 6. This indicates the type of join, as we are used to from most data frame apis
 
-_We only showed some parts of the code to support the understanding here._
+<!---aigen_start-->
+Right below these fields, `JoinArgSpec` also has two `model_validator`s that check `left_on`/`right_on` have matching lengths and default `operator_list` to `EQUAL` for every pair - omitted above for brevity, but worth a look if you want to see validators in practice.
+<!---aigen_end-->
 
 You can utilise Pydantic's model_validators to ensure, that the parameters are given properly, which helps a lot with debugging in advance.
 
 From the ArgSpec, we now derive the ArgSpecType using
-```python
-JoinArgSpecType = TypeVar("JoinArgSpecType", bound=JoinArgSpec)  # pylint: disable=invalid-name # (1)!
+<!---aigen_start-->
+```python title="src/eltstar/models/data_frame_wrapper/functions/join.py"
+--8<-- "src/eltstar/models/data_frame_wrapper/functions/join.py:join-arg-spec-type"
 ```
+<!---aigen_end-->
 
 This will be used in our Func Spec to type the arg_spec.
 
@@ -105,10 +81,11 @@ Similar to the ArgSpec, the same naming convention applies to the FuncSpec. Just
 The FuncSpec is defined as a pydantic model, as well.
 Here we provide a bit more convenience for the model through generics:
 
-```python
-class JoinFuncSpec(WrapperFunctionSpec[type[JoinArgSpecType]]): # (1)!
-    func_name: str = "join" # (2)!
+<!---aigen_start-->
+```python title="src/eltstar/models/data_frame_wrapper/functions/join.py"
+--8<-- "src/eltstar/models/data_frame_wrapper/functions/join.py:join-func-spec"
 ```
+<!---aigen_end-->
 
 1. We have to pass the ArgSpecType's type as the WrapperFunctionSpec's generic's instantiation. It's important to provide the TypeVar/Type, so we can later use Engine Specific ArgSpec Types
 2. The func_name is required and will indicate the calling name from the DataFrameWrapper. At the same time it acts as its identifier, which allows you, to later overwrite the function definition, if you need it.
@@ -122,33 +99,20 @@ Based on these definitions, we can now provide implementations for engines.
 
 For the actual implementation in polars, we can now use the following lines:
 
-```python
-...
+<!---aigen_start-->
+```python title="plugins/engines/polars/src/eltstar_engine_polars/functions/join.py"
+from enum import StrEnum, auto
+from typing import Literal
 
-class PolarsJoinComparisonOperator(StrEnum): # (1)!
-    EQUAL = auto()
+import polars as pl
 
+from eltstar.models.data_frame_wrapper.functions.join import JoinArgSpec, JoinFuncSpec
+from eltstar.models.data_frame_wrapper.wrapper import DataFrameWrapper
+from eltstar_engine_polars.engine import PolarsEngine
 
-class PolarsJoinArgSpec(JoinArgSpec): # (2)!
-    operator_list: list[PolarsJoinComparisonOperator]
-    how: Literal["inner", "left", "right", "full", "cross", "semi", "anti"] # (3)!
-
-
-def join(self: DataFrameWrapper, function_spec: PolarsJoinArgSpec) -> DataFrameWrapper: # (4)!
-    df_in: pl.DataFrame = self.data_frame # (5)!
-    df_other: pl.DataFrame = function_spec.other.data_frame # (6)!
-
-    joined = df_in.join(df_other, left_on=function_spec.left_on, right_on=function_spec.right_on, how=function_spec.how) # (7)!
-
-    return DataFrameWrapper(data_frame=joined, engine=self.engine) # (8)!
-
-
-DataFrameWrapper.register_wrapper_function( # (9)!
-    engine=PolarsEngine, # (10)!
-    func_spec=JoinFuncSpec(arg_spec=PolarsJoinArgSpec), # (11)!
-    func=join, # (12)!
-)
+--8<-- "plugins/engines/polars/src/eltstar_engine_polars/functions/join.py:polars-join-implementation"
 ```
+<!---aigen_end-->
 
 1. The polars specific join comparison operators, since we only allow equals for polars for now
 2. The polars specific join ArgSpec, since the how in Polars has a specific set of parameters, compared to e.g. pyspark.
@@ -169,10 +133,11 @@ If you define these functions, it is very important to give us a hint, where we 
 You can do this in your pyproject.toml using the entrypoint group `"eltstar.wrapper_functions"`.
 Every registration of a wrapper_function, that you list in your entry-points group with this name, will be automatically found by eltstar.
 
-```toml
-[project.entry-points."eltstar.wrapper_functions"]
-join = "eltstar_engine_polars.functions.join" # (1)!
+<!---aigen_start-->
+```toml title="plugins/engines/polars/pyproject.toml"
+--8<-- "plugins/engines/polars/pyproject.toml:join-entrypoint"
 ```
+<!---aigen_end-->
 1. The join key on the left side is irrelevant for us. We like to name it the same as our function and module, but the key is not used by us.
 
 ### Usage
@@ -191,20 +156,16 @@ We provide 2 DataFrameWrappers in 2 modules.
 
 Using the wrapper function is as simple as calling:
 
-```python
-from eltstar.models.data_frame_wrapper.preloaded_wrapper import DataFrameWrapper # (1)!
+<!---aigen_start-->
+```python title="examples/eltstar_polars_example/src/eltstar_polars_example/wrapper_function_example.py"
+from eltstar_engine_polars.functions.join import PolarsJoinArgSpec
+
+--8<-- "examples/eltstar_polars_example/src/eltstar_polars_example/wrapper_function_example.py:join-usage-import"
 df_w1: DataFrameWrapper = ...
 df_w2: DataFrameWrapper = ...
-joined_wrapper = df_w1.join(
-        function_spec=PolarsJoinArgSpec( # (2)!
-            other=df_w2, # (3)!
-            left_on=["id_1", "id_2"], # (4)!
-            right_on=["id_1", "id_2"], # (5)!
-            how="inner", # (6)!
-        ),
-    )
-print(joined_wrapper.data_frame)
+--8<-- "examples/eltstar_polars_example/src/eltstar_polars_example/wrapper_function_example.py:join-usage"
 ```
+<!---aigen_end-->
 1. As mentioned above, we should use the preloaded DataFrameWrapper for usage here - especially if this is a transformation
 2. We use the engine specific Arg Spec in this case, but if you specified the specific ArgSpec as recommended to only be a subset of the general ArgSpec, you should use the general ArgSpec, so that you don't have to change anything to switch between engines
 3. The second DataFrameWrapper to join to the first one

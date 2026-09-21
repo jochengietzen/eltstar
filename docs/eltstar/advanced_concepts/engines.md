@@ -9,40 +9,28 @@ Every table you've seen so far declared an `engine`, e.g. `engine: type[EngineTy
 
 An engine subclasses `Engine` (from `eltstar.engines.base`) and, at import time, registers a mapping between eltstar's [`DataType`s](../core_concepts/model_driven.md#table-instances) and its own native types via a classmethod conventionally called `setup()`:
 
-```python
+```python title="plugins/engines/polars/src/eltstar_engine_polars/engine.py"
 from eltstar.engines.base import Engine, EngineSpecificDataType
-from eltstar.models.base import IntegerType, StringType
+from eltstar.models.base import FloatType, IntegerType, StringType
+from eltstar.models.schema import Schema
 import polars as pl
 
-class PolarsEngine(Engine):
-    engine_identifier: ClassVar[str] = "polars" # (1)!
-    internal_schema_type: ClassVar[type[pl.Schema]] = pl.Schema # (2)!
+--8<-- "plugins/engines/polars/src/eltstar_engine_polars/engine.py:engine-attrs"
 
     @classmethod
     def setup(cls):
-        cls.register_data_type(
-            data_type=IntegerType(),
-            engine_type=pl.Int64, # (3)!
-        )
-        cls.register_data_type(
-            data_type=StringType(),
-            engine_type=EngineSpecificDataType(dtype_class=pl.String),
-        )
-        Schema.register_from_engine_schema( # (4)!
-            engine_identifier=cls.engine_identifier,
-            engine_schema_type=cls.internal_schema_type,
-            from_method=cls._from_engine_schema,
-            to_method=cls._to_engine_schema,
-        )
+        --8<-- "plugins/engines/polars/src/eltstar_engine_polars/engine.py:engine-setup-excerpt"
+        ...  # a handful more `register_data_type` calls, one per supported `DataType`
 
-PolarsEngine.setup() # (5)!
+--8<-- "plugins/engines/polars/src/eltstar_engine_polars/engine.py:engine-setup-call"
 ```
 
 1. Every engine needs a unique, lowercase `engine_identifier` string - this is the key used everywhere internally (registries, `EngineSpecificFunctionKey`, ...).
 2. The native schema type for this engine (`pl.Schema` for polars). Used to dispatch `Schema.from_engine_schema` to the right engine when you only have a native schema object and want the eltstar `Schema` for it.
-3. `register_data_type` accepts either a bare native type/class, or an `EngineSpecificDataType` for cases that need more than a plain class comparison - a `lambda_class` (a callable returning the type, useful for parametrized types like `pl.Datetime(time_unit=..., time_zone=...)`) or a `str_repr` for engines whose "type" is really just a string.
-4. `Schema.register_from_engine_schema` wires up the two-way conversion between the eltstar `Schema` and this engine's native schema representation - see below.
-5. **This line matters.** Registration only happens when `setup()` is actually called. See [Discovery, honestly](#discovery-honestly) below for how (and when) that currently happens.
+3. `Schema.register_from_engine_schema` wires up the two-way conversion between the eltstar `Schema` and this engine's native schema representation - see below.
+4. `register_data_type` accepts a bare native type/class, like here for `FloatType`/`pl.Float64`, ...
+5. ... or an `EngineSpecificDataType` for cases that need more than a plain class comparison - a `dtype_class`/`lambda_class` (a callable returning the type, useful for parametrized types like `pl.Datetime(time_unit=..., time_zone=...)`) or a `str_repr` for engines whose "type" is really just a string.
+6. **This line matters.** Registration only happens when `setup()` is actually called. See [Discovery, honestly](#discovery-honestly) below for how (and when) that currently happens.
 
 ## The abstract methods
 

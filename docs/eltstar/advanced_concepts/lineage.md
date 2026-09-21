@@ -1,12 +1,10 @@
 <!---aigen_start-->
 # Lineage
 
-Every transformation you register already declares which tables it reads and which table it writes (see [Running a pipeline](../core_concepts/running_a_pipeline.md)). eltstar uses exactly that information to build a lineage graph across your whole pipeline - you don't declare anything extra for this to work.
+Every transformation you register already declares which tables it reads and which table it writes (see [Running a pipeline](../core_concepts/running_a_pipeline.md)). eltstar uses exactly that information to build a lineage graph across your whole pipeline - you don't declare anything extra for this to work. Here it is used to print every edge in the [minimal example](https://github.com/jochengietzen/eltstar/tree/main/examples/eltstar_minimal_example)'s pipeline:
 
-```python
-from eltstar.transformation import manager
-
-lineage = manager.lineage
+```python title="examples/eltstar_minimal_example/src/eltstar_minimal_example/main.py"
+--8<-- "examples/eltstar_minimal_example/src/eltstar_minimal_example/main.py:lineage-edges"
 ```
 
 `manager.lineage` builds a fresh [`networkx`](https://networkx.org/) `MultiDiGraph` from every currently registered transformation, each time you access it. Tables and transformations both become nodes; an edge points from an input table to the transformation that reads it, and from a transformation to the table it writes.

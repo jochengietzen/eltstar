@@ -49,9 +49,13 @@ if __name__ == "__main__":
     )
     print(data)
 
+    ### aigen_start
+    # --8<-- [start:verify-schema]
     df_w = DataFrameWrapper(data_frame=data, schema=tbl.columns.get_schema(), engine=PolarsEngine)
 
-    df_w.verify_schema(raise_on_mismatch=True)
+    df_w.verify_schema(raise_on_mismatch=True)  # (1)!
+    # --8<-- [end:verify-schema]
+    ### aigen_end
 
     tbl._verify_schema(data_frame_wrapper=df_w)
 

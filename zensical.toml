@@ -367,6 +367,15 @@ pygments_lang_class = true
 [project.markdown_extensions.pymdownx.magiclink]
 [project.markdown_extensions.pymdownx.mark]
 [project.markdown_extensions.pymdownx.smartsymbols]
+# aigen_start
+[project.markdown_extensions.pymdownx.snippets]
+# Enables embedding code straight from examples/ and src/ into the docs via
+# "--8<--" includes, so documented code stays in sync with the real thing.
+# https://zensical.org/docs/setup/extensions/#snippets
+base_path = ["."]
+check_paths = true
+dedent_subsections = true
+# aigen_end
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [
   { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }
