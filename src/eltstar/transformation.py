@@ -1,4 +1,5 @@
 import importlib
+import importlib.util
 import inspect
 import pkgutil
 from collections.abc import Callable
@@ -136,7 +137,10 @@ class TransformationManager:
         for loader, sub_module_name, _ in pkgutil.walk_packages(path=transformation_package.__path__):
             spec = loader.find_spec(sub_module_name)  # type: ignore
             mod = importlib.util.module_from_spec(spec)  # type: ignore
-            spec.loader.exec_module(mod)  # type: ignore
+            try:
+                spec.loader.exec_module(mod)  # type: ignore
+            except Exception as e:
+                raise ImportError(f"Failed to load transformation module '{sub_module_name}': {e}") from e
 
     def _check_initialization_state(self) -> None:
         missing_init: list[str] = []
@@ -262,11 +266,18 @@ class TransformationManager:
             "eltstar.engines",
             "eltstar.runtime_systems",
         ]
+        errors: list[Exception] = []
         for group in plugin_groups:
             logger.info("Loading plugin group: %s", group)
             for ep in entry_points(group=group):
                 logger.info("Loading entry point: %s", ep)
-                ep.load()
+                try:
+                    ep.load()
+                except Exception as e:  # pylint: disable=broad-except
+                    logger.error("Failed to load plugin entry point '%s' in group '%s': %s", ep, group, e)
+                    errors.append(e)
+        if errors:
+            raise ExceptionGroup("Failed to load one or more eltstar plugins", errors)
 
     def execute_all_transformations(self) -> None:
         """aigen_start

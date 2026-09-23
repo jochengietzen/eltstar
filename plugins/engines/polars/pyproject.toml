@@ -11,6 +11,7 @@ requires-python = ">=3.13"
 dependencies = [
     "eltstar",
     "polars>=1.34.0",
+    "pyarrow>=23.0.1",
 ]
 
 [tool.uv]
@@ -18,9 +19,6 @@ package = true
 
 [tool.uv.sources]
 eltstar = { workspace = true }
-
-[project.scripts]
-eltstar-engine-polars = "eltstar_engine_polars:main"
 
 # aigen_start
 # --8<-- [start:join-entrypoint]

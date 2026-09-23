@@ -7,7 +7,8 @@ from eltstar.models.schema import Schema, SchemaField
 from eltstar_custom_data_types_example.data_types import DoubleType, MissingDataType
 from eltstar_custom_data_types_example.engines import ArrowEngine, PolarsEngine
 
-if __name__ == "__main__":
+
+def main() -> None:
     df = pl.DataFrame(
         {
             "foo": [1, 2, 3],
@@ -54,3 +55,7 @@ if __name__ == "__main__":
             "The conversion from arrow to polars should have failed, "
             "since polars is not aware of the 'MissingDataType'!"
         )
+
+
+if __name__ == "__main__":
+    main()

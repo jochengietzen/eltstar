@@ -1,11 +1,11 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 from eltstar.graph import Lineage
 
 
 ### aigen_start
 # --8<-- [start:runtime-system-interface]
-class BaseRuntimeSystem:
+class BaseRuntimeSystem(ABC):
     @abstractmethod
     def generate(self, lineage: Lineage, source_table_type: type | None = None) -> None:
         """aigen_start
