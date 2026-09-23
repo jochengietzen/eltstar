@@ -1,5 +1,5 @@
 from importlib.metadata import entry_points
-from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, Optional, Protocol, TypeVar, Union
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, Optional, Protocol, Union
 
 from eltstar.exceptions import ProgrammingError, SchemaVerificationError, WrapperFunctionException
 from eltstar.logging import logger
@@ -217,11 +217,27 @@ class DataFrameWrapper:
         cls._loaded_plugins = True
 
 
-DataFrameType = TypeVar("DataFrameType")  # pylint: disable=invalid-name
+class TypedDataFrameWrapper[DataFrameT](DataFrameWrapper):  # type: ignore
+    """
+    A DataFrameWrapper whose ``data_frame`` is statically typed as the concrete dataframe
+    type you construct it with, e.g. ``TypedDataFrameWrapper(data_frame=pl.DataFrame(...))``
+    types ``.data_frame`` as ``pl.DataFrame`` for IDE/mypy autocomplete. The ``engine`` is
+    derived automatically by looking up which registered Engine handles ``type(data_frame)``.
+    """
 
+    def __init__(
+        self,
+        data_frame: DataFrameT,
+        schema: Optional["Schema"] = None,
+        auto_verify_schema_if_given: bool = False,
+    ) -> None:
+        from eltstar.engines.base import Engine  # pylint: disable=import-outside-toplevel  # breaks an import cycle
 
-# TODO: try to find proper way to handle pydantic and mypy
-class TypedDataFrameWrapper[DataFrameT: DataFrameType](DataFrameWrapper):  # type: ignore
-    def __init__(self, data_frame: DataFrameT, schema: Optional["Schema"] = None) -> None:
-        super().__init__(data_frame=data_frame, schema=schema)
+        engine = Engine.get_engine_for_dataframe_type(type(data_frame))
+        super().__init__(
+            data_frame=data_frame,
+            schema=schema,
+            engine=engine,
+            auto_verify_schema_if_given=auto_verify_schema_if_given,
+        )
         self.data_frame: DataFrameT = data_frame

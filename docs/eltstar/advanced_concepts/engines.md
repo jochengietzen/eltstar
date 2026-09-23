@@ -27,10 +27,11 @@ import polars as pl
 
 1. Every engine needs a unique, lowercase `engine_identifier` string - this is the key used everywhere internally (registries, `EngineSpecificFunctionKey`, ...).
 2. The native schema type for this engine (`pl.Schema` for polars). Used to dispatch `Schema.from_engine_schema` to the right engine when you only have a native schema object and want the eltstar `Schema` for it.
-3. `Schema.register_from_engine_schema` wires up the two-way conversion between the eltstar `Schema` and this engine's native schema representation - see below.
-4. `register_data_type` accepts a bare native type/class, like here for `FloatType`/`pl.Float64`, ...
-5. ... or an `EngineSpecificDataType` for cases that need more than a plain class comparison - a `dtype_class`/`lambda_class` (a callable returning the type, useful for parametrized types like `pl.Datetime(time_unit=..., time_zone=...)`) or a `str_repr` for engines whose "type" is really just a string.
-6. **This line matters.** Registration only happens when `setup()` is actually called. See [Discovery, honestly](#discovery-honestly) below for how (and when) that currently happens.
+3. The engine's native dataframe class (`pl.DataFrame` for polars). As soon as this class is defined, `Engine.__init_subclass__` registers it in a `dataframe_type -> Engine` lookup table - this is what lets `TypedDataFrameWrapper` figure out which engine a `pl.DataFrame`/`pd.DataFrame`/... belongs to without you passing `engine=` yourself. See [DataFrameWrapper](../core_concepts/data_frame_wrapper.md#typeddataframewrapper).
+4. `Schema.register_from_engine_schema` wires up the two-way conversion between the eltstar `Schema` and this engine's native schema representation - see below.
+5. `register_data_type` accepts a bare native type/class, like here for `FloatType`/`pl.Float64`, ...
+6. ... or an `EngineSpecificDataType` for cases that need more than a plain class comparison - a `dtype_class`/`lambda_class` (a callable returning the type, useful for parametrized types like `pl.Datetime(time_unit=..., time_zone=...)`) or a `str_repr` for engines whose "type" is really just a string.
+7. **This line matters.** Registration only happens when `setup()` is actually called. See [Discovery, honestly](#discovery-honestly) below for how (and when) that currently happens.
 
 ## The abstract methods
 
