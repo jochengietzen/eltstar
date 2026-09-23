@@ -32,6 +32,11 @@ members = [
     "plugins/runtime_systems/databricks/asset_bundle_jobs",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["tests", "plugins", "examples"]
+env = ["TZ=UTC"]
+addopts = "--cov=src --cov=plugins --cov=examples --cov-fail-under=0 --cov-report=term-missing:skip-covered --no-cov-on-fail"
+
 [tool.mypy]
 exclude = [
     "^one\\.py$",
@@ -131,6 +136,7 @@ dev = [
     "pylint>=3.3.7",
     "pytest>=8.3.5",
     "pytest-cov==6.2.1",
+    "pytest-env>=1.7.0",
     "ruff>=0.11.11",
 ]
 docs = [

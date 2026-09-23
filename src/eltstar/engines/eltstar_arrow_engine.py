@@ -29,6 +29,7 @@ def arrow_frame(frame: Any) -> TypeGuard[pa.Table]:
 class ArrowEngine(Engine):
     engine_identifier: ClassVar[str] = ARROW_ENGINE_IDENTIFIER
     internal_schema_type: ClassVar[type[pa.Schema]] = pa.Schema
+    dataframe_type: ClassVar[type[pa.Table]] = pa.Table
 
     @classmethod
     def _from_engine_schema(cls, schema: pa.Schema) -> Schema:
@@ -64,6 +65,10 @@ class ArrowEngine(Engine):
         )
 
     @classmethod
+    def get_engine_schema(cls, data_frame_wrapper: DataFrameWrapper) -> pa.Schema:
+        return data_frame_wrapper.data_frame.schema
+
+    @classmethod
     def cast(cls, schema: Schema, data_frame_wrapper: DataFrameWrapper) -> DataFrameWrapper:
         data_frame: pa.Table = data_frame_wrapper.data_frame
         return data_frame_wrapper.create_with_new_data(
@@ -81,7 +86,7 @@ class ArrowEngine(Engine):
     @classmethod
     def convert_to_arrow(
         cls, schema: Schema, data_frame_wrapper: "DataFrameWrapper"
-    ) -> "TypedDataFrameWrapper[ArrowEngine]":
+    ) -> "TypedDataFrameWrapper[pa.Table]":
         """Cannot convert arrow to arrow"""
         raise ProgrammingError(
             "A dataframe wrapper for engine Arrow cannot be converted to Arrow. This should not happen!"
@@ -89,7 +94,7 @@ class ArrowEngine(Engine):
 
     @classmethod
     def convert_from_arrow(
-        cls, schema: Schema, data_frame_wrapper: "TypedDataFrameWrapper[ArrowEngine]"
+        cls, schema: Schema, data_frame_wrapper: "TypedDataFrameWrapper[pa.Table]"
     ) -> "DataFrameWrapper":
         """Cannot convert arrow to arrow"""
         raise ProgrammingError(

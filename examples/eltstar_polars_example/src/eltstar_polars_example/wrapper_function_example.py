@@ -1,10 +1,15 @@
+from eltstar_engine_polars.functions.join import PolarsJoinArgSpec
 import polars as pl
 from eltstar_engine_polars.engine import PolarsEngine
 
 from eltstar.models.base import FloatType, IntegerType
 from eltstar.models.schema import Schema, SchemaField
 from eltstar.models.data_frame_wrapper.functions.join import JoinArgSpec
-from eltstar.models.data_frame_wrapper.preloaded_wrapper import DataFrameWrapper
+### aigen_start
+# --8<-- [start:join-usage-import]
+from eltstar.models.data_frame_wrapper.preloaded_wrapper import DataFrameWrapper  # (1)!
+# --8<-- [end:join-usage-import]
+### aigen_end
 
 if __name__ == "__main__":
     df = pl.DataFrame(
@@ -33,8 +38,17 @@ if __name__ == "__main__":
     df_w1 = DataFrameWrapper(data_frame=df, schema=schema, engine=PolarsEngine())
     df_w2 = DataFrameWrapper(data_frame=df_2, schema=schema, engine=PolarsEngine())
 
+    ### aigen_start
+    # --8<-- [start:join-usage]
     print(
         df_w1.join(
-            function_spec=JoinArgSpec(other=df_w2, left_on=["id_1", "id_2"], right_on=["id_1", "id_2"], how="inner"),
+            function_spec=PolarsJoinArgSpec(  # (2)!
+                other=df_w2,  # (3)!
+                left_on=["id_1", "id_2"],  # (4)!
+                right_on=["id_1", "id_2"],  # (5)!
+                how="inner",  # (6)!
+            ),
         ).data_frame
     )
+    # --8<-- [end:join-usage]
+    ### aigen_end

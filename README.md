@@ -16,11 +16,11 @@ The schema is used to define the structure of your data. It contains the name of
 
 # TODOS
     
-    - TODO: Embed example code into documentation (V1-2) to ensure example code is still valid/running.
+    - TODO: Make sure to use the tighter ArgSpec in the make_func of the DataFrameWrapper function load_all_plugins. (V1)
+        This is to enable you to use the JoinArgSpec in your call but we make sure, that if you are on Polars, it will utilise the PolarsArgSpec instead
     - TODO: Provide proper Documentation (V1)
-    - TODO: Build very very minimal example for quick overview of concepts (V1)
-        - TODO: Build minimal exmaple for asset bundles! (V1)
-    - TODO: Add verify_schema functionality for a full table in the Table class (V1)
+    - TODO: Build minimal exmaple that actually touches all basic parts but with a full on structure, testing and a simple wrapper function! (V1)
+    - TODO: Build minimal exmaple for asset bundles! (V1)
     - TODO: Make sure, that primary key generates the most values in the FakerManager generation! (V1)
     - TODO: Provide Tests for Core libraries
     - TODO: Release Process! (V1)
@@ -31,6 +31,7 @@ The schema is used to define the structure of your data. It contains the name of
                 => Remove Squash merge and always use fast-forward merges
                     - Enforce conventional commits for messages
                     - Restrict number of commits per branch
+    - TODO: CoAuthor Commits
 
     - TODO: Add SchemaStruct Class! (V2)
         - TODO: provide implementation for to_engine_type in SchemaStruct Class! (V2)

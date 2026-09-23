@@ -18,3 +18,7 @@ class WrapperFunctionException(Exception):
 
 class TransformationDefinitionError(Exception):
     """Indicates a mistake in using the transformation manager"""
+
+
+class SchemaVerificationError(Exception):
+    """Indicates an error during schema verification"""

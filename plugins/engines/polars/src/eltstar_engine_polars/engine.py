@@ -1,6 +1,7 @@
 from typing import Any, ClassVar, TypeGuard
 
 import polars as pl
+import pyarrow as pa
 
 from eltstar.engines.base import Engine, EngineSpecificDataType
 from eltstar.engines.eltstar_arrow_engine import ArrowEngine
@@ -14,6 +15,7 @@ from eltstar.models.base import (
     StringType,
     TimestampTypeSecondsNTZ,
     TimestampTypeSecondsUTC,
+    UUIDType,
 )
 from eltstar.models.data_frame_wrapper import DataFrameWrapper, TypedDataFrameWrapper
 from eltstar.models.schema import Schema, SchemaField
@@ -24,9 +26,14 @@ def polars_frame(frame: Any) -> TypeGuard[pl.DataFrame]:
     return isinstance(frame, pl.DataFrame)
 
 
+### aigen_start
+# --8<-- [start:engine-attrs]
 class PolarsEngine(Engine):
-    engine_identifier: ClassVar[str] = "polars"
-    internal_schema_type: ClassVar[type[pl.Schema]] = pl.Schema
+    engine_identifier: ClassVar[str] = "polars"  # (1)!
+    internal_schema_type: ClassVar[type[pl.Schema]] = pl.Schema  # (2)!
+    dataframe_type: ClassVar[type[pl.DataFrame]] = pl.DataFrame  # (3)!
+# --8<-- [end:engine-attrs]
+### aigen_end
 
     @classmethod
     def _from_engine_schema(cls, schema: Any) -> Schema:
@@ -56,6 +63,10 @@ class PolarsEngine(Engine):
         )
 
     @classmethod
+    def get_engine_schema(cls, data_frame_wrapper: DataFrameWrapper) -> pl.Schema:
+        return data_frame_wrapper.data_frame.schema
+
+    @classmethod
     def cast(cls, schema: Schema, data_frame_wrapper: DataFrameWrapper) -> DataFrameWrapper:
         data_frame: pl.DataFrame = data_frame_wrapper.data_frame
         return data_frame_wrapper.create_with_new_data(data_frame=data_frame.cast(cls._to_engine_schema(schema=schema)))
@@ -70,7 +81,7 @@ class PolarsEngine(Engine):
     @classmethod
     def convert_to_arrow(
         cls, schema: Schema, data_frame_wrapper: DataFrameWrapper
-    ) -> TypedDataFrameWrapper[ArrowEngine]:
+    ) -> TypedDataFrameWrapper[pa.Table]:
         """Converts the engine specific dataframe wrapper to an arrow object"""
         data_frame: pl.DataFrame = data_frame_wrapper.data_frame
         return DataFrameWrapper(
@@ -81,7 +92,7 @@ class PolarsEngine(Engine):
 
     @classmethod
     def convert_from_arrow(
-        cls, schema: Schema, data_frame_wrapper: TypedDataFrameWrapper[ArrowEngine]
+        cls, schema: Schema, data_frame_wrapper: TypedDataFrameWrapper[pa.Table]
     ) -> DataFrameWrapper:
         """Converts the engine specific dataframe wrapper to an arrow object"""
         data_frame: pa.Table = data_frame_wrapper.data_frame
@@ -93,7 +104,9 @@ class PolarsEngine(Engine):
 
     @classmethod
     def setup(cls):
-        Schema.register_from_engine_schema(
+        ### aigen_start
+        # --8<-- [start:engine-setup-excerpt]
+        Schema.register_from_engine_schema(  # (4)!
             engine_identifier=cls.engine_identifier,
             engine_schema_type=cls.internal_schema_type,
             from_method=cls._from_engine_schema,
@@ -105,12 +118,14 @@ class PolarsEngine(Engine):
         )
         cls.register_data_type(
             data_type=FloatType(),
-            engine_type=pl.Float64,
+            engine_type=pl.Float64,  # (5)!
         )
         cls.register_data_type(
             data_type=StringType(),
-            engine_type=EngineSpecificDataType(dtype_class=pl.String),
+            engine_type=EngineSpecificDataType(dtype_class=pl.String),  # (6)!
         )
+        # --8<-- [end:engine-setup-excerpt]
+        ### aigen_end
         cls.register_data_type(
             data_type=BooleanType(),
             engine_type=EngineSpecificDataType(dtype_class=pl.Boolean),
@@ -148,11 +163,14 @@ class PolarsEngine(Engine):
                 dtype_class=pl.Decimal(precision=decimal_type28.precision, scale=decimal_type28.scale)
             ),
         )
-        # cls.register_data_type(
-        #     data_type=UUIDType(),
-        #         engine_type=EngineSpecificDataType(dtype_class=pl.String),
-        #     )
-        # )
+        cls.register_data_type(
+            data_type=UUIDType(),
+            engine_type=EngineSpecificDataType(dtype_class=pl.String),
+        )
 
 
-PolarsEngine.setup()
+### aigen_start
+# --8<-- [start:engine-setup-call]
+PolarsEngine.setup()  # (7)!
+# --8<-- [end:engine-setup-call]
+### aigen_end
