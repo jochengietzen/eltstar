@@ -65,3 +65,19 @@ If you'd rather fix the mismatch than fail on it (e.g. a source system that repo
 Lastly, `convert_to(target_engine)` gives you the same `DataFrameWrapper`, backed by a *different* engine's native dataframe type - handy when you need to hand data from a polars-backed table to a wrapper function that's only implemented for pandas. See [Engines](../advanced_concepts/engines.md#converting-between-engines-the-arrow-bridge) for how that conversion actually works under the hood.
 <!---aigen_end-->
 
+<!---aigen_start-->
+## TypedDataFrameWrapper
+
+Plain `DataFrameWrapper.data_frame` is typed as `Any` - correct, since a wrapper can hold any dataframe library's object, but it means no autocomplete and no type-checking on whatever you do with `.data_frame` next. `TypedDataFrameWrapper` fixes that by being generic over the concrete dataframe type:
+
+```python
+dfw = TypedDataFrameWrapper(data_frame=df)  # df: pl.DataFrame
+```
+
+Since `data_frame` is typed as the generic parameter, your type checker infers it from whatever you pass in - `dfw.data_frame` is statically known as `pl.DataFrame` here, so your IDE gives you real autocomplete on it, the same as if you'd never wrapped `df` at all.
+
+You still don't need to pass `engine=` yourself: `TypedDataFrameWrapper.__init__` looks up `type(data_frame)` against a registry that every [`Engine`](../advanced_concepts/engines.md) subclass populates automatically (via its `dataframe_type`, as soon as the engine's module is imported), and sets `self.engine` from whatever it finds. If no engine is registered for that dataframe type - typically because the corresponding plugin was never imported - it raises a `ProgrammingError` immediately rather than leaving you with an engine-less wrapper that fails confusingly later in `cast()`/`convert_to()`.
+
+This is mainly useful for annotating function parameters/return types where you want both the reader and the type checker to know exactly which dataframe type is involved - see `Engine.convert_to_arrow`/`convert_from_arrow` for an example of this in core, which annotate their arrow-backed inputs/outputs as `TypedDataFrameWrapper[pa.Table]`.
+<!---aigen_end-->
+
