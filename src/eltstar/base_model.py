@@ -16,11 +16,17 @@ class BaseModel(_BaseModel):
         :param encoding: Encoding of the file
         returns: Model
         """
-        with open(path, encoding=encoding) as f:
-            return cls(**yaml.full_load(f))
+        try:
+            with open(path, encoding=encoding) as f:
+                data = yaml.full_load(f)
+        except OSError as e:
+            raise OSError(f"Could not read YAML file at '{path}': {e}") from e
+        except yaml.YAMLError as e:
+            raise yaml.YAMLError(f"Could not parse YAML file at '{path}': {e}") from e
+        return cls(**data)
 
     def __hash__(self) -> int:
-        return hash(str(self.dict()))
+        return hash(str(self.model_dump()))
 
 
 class DictRootModel[KeyType, ValueType](RootModel[dict[KeyType, ValueType]]):

@@ -18,7 +18,6 @@ The schema is used to define the structure of your data. It contains the name of
     
     - TODO: Make sure to use the tighter ArgSpec in the make_func of the DataFrameWrapper function load_all_plugins. (V1)
         This is to enable you to use the JoinArgSpec in your call but we make sure, that if you are on Polars, it will utilise the PolarsArgSpec instead
-    - TODO: Embed example code into documentation (V1-2) to ensure example code is still valid/running.
     - TODO: Provide proper Documentation (V1)
     - TODO: Build minimal exmaple that actually touches all basic parts but with a full on structure, testing and a simple wrapper function! (V1)
     - TODO: Build minimal exmaple for asset bundles! (V1)

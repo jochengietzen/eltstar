@@ -21,9 +21,6 @@ package = true
 [tool.uv.sources]
 eltstar = { workspace = true }
 
-[project.scripts]
-eltstar-engine-pandas = "eltstar_engine_pandas:main"
-
 [project.entry-points."eltstar.wrapper_functions"]
 join = "eltstar_engine_pandas.functions.join"
 

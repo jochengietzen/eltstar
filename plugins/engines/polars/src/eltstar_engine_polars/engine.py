@@ -1,6 +1,7 @@
 from typing import Any, ClassVar, TypeGuard
 
 import polars as pl
+import pyarrow as pa
 
 from eltstar.engines.base import Engine, EngineSpecificDataType
 from eltstar.engines.eltstar_arrow_engine import ArrowEngine
