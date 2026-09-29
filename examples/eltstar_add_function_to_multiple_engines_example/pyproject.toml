@@ -1,0 +1,33 @@
+[project]
+name = "eltstar-add-function-to-multiple-engines-example"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Jochen Gietzen", email = "jochen.gietzen@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "eltstar",
+    "eltstar-engine-pandas",
+    "eltstar-engine-polars",
+    "pandas>=3.0.3",
+    "polars>=1.40.1",
+    "pytest>=9.0.3",
+]
+
+[project.scripts]
+eltstar-add-function-to-multiple-engines-example = "eltstar_add_function_to_multiple_engines_example:main"
+
+[project.entry-points."eltstar.wrapper_functions"]
+ordered_duplicate_polars = "eltstar_add_function_to_multiple_engines_example.ordered_duplicate_polars_implementation"
+ordered_duplicate_pandas = "eltstar_add_function_to_multiple_engines_example.ordered_duplicate_pandas_implementation"
+
+[build-system]
+requires = ["uv_build>=0.8.12,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+eltstar = { workspace = true }
+eltstar-engine-polars = { workspace = true }
+eltstar-engine-pandas = { workspace = true }

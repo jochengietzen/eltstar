@@ -1,0 +1,41 @@
+[project]
+name = "eltstar-engine-pandas"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    {name = "Tim Bossenmaier", email="bossenti@posteo.de"},
+    {name = "Jochen Gietzen", email="jochen.gietzen@gmail.com"}
+]
+requires-python = ">=3.13"
+dependencies = [
+    "eltstar",
+    "pandas>=3.0",
+    "pyarrow>=23.0.1",
+    "pyarrow-stubs>=20.0.0.20251215",
+]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+eltstar = { workspace = true }
+
+[project.scripts]
+eltstar-engine-pandas = "eltstar_engine_pandas:main"
+
+[project.entry-points."eltstar.wrapper_functions"]
+join = "eltstar_engine_pandas.functions.join"
+
+[tool.uv.build-backend]
+module-name = ["eltstar_engine_pandas"]
+module-root = "src"
+
+[build-system]
+requires = ["uv_build>=0.8.12,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
