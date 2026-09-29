@@ -25,6 +25,7 @@ def pandas_frame(frame: Any) -> TypeGuard[pd.DataFrame]:
 class PandasEngine(Engine):
     engine_identifier: ClassVar[str] = "pandas"
     internal_schema_type: ClassVar[type[dict[Any, Any]]] = dict
+    dataframe_type: ClassVar[type[pd.DataFrame]] = pd.DataFrame
 
     @classmethod
     def _from_engine_schema(cls, schema: Any) -> Schema:
@@ -94,7 +95,7 @@ class PandasEngine(Engine):
     @classmethod
     def convert_to_arrow(
         cls, schema: Schema, data_frame_wrapper: DataFrameWrapper
-    ) -> TypedDataFrameWrapper[ArrowEngine]:
+    ) -> TypedDataFrameWrapper[pa.Table]:
         """Converts the engine specific dataframe wrapper to an arrow object"""
         data_frame: pd.DataFrame = data_frame_wrapper.data_frame
         return DataFrameWrapper(
@@ -105,7 +106,7 @@ class PandasEngine(Engine):
 
     @classmethod
     def convert_from_arrow(
-        cls, schema: Schema, data_frame_wrapper: TypedDataFrameWrapper[ArrowEngine]
+        cls, schema: Schema, data_frame_wrapper: TypedDataFrameWrapper[pa.Table]
     ) -> DataFrameWrapper:
         """Converts the engine specific dataframe wrapper to an arrow object"""
         data_frame: pa.Table = data_frame_wrapper.data_frame

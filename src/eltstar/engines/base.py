@@ -2,6 +2,7 @@ from abc import abstractmethod
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, Protocol, Self, TypeVar
 
+import pyarrow as pa
 from pydantic import model_validator
 
 from eltstar.base_model import BaseModel, DictRootModel
@@ -11,7 +12,6 @@ from eltstar.models.schema import Schema
 from eltstar.utils import coalesce
 
 if TYPE_CHECKING:
-    from eltstar.engines.eltstar_arrow_engine import ArrowEngine
     from eltstar.models.data_frame_wrapper.wrapper import DataFrameWrapper, TypedDataFrameWrapper
 
 ARROW_ENGINE_IDENTIFIER = "arrow"
@@ -97,9 +97,32 @@ class Engine(BaseModel):
     # - write
     engine_identifier: ClassVar[str]
     internal_schema_type: ClassVar[type[Any]]
+    dataframe_type: ClassVar[type[Any]]
     registered_types: ClassVar[dict[str, RegisteredTypeLookup]] = {}
+    registered_engines_by_dataframe_type: ClassVar[dict[type[Any], type["Engine"]]] = {}
     # TODO: Switch other registragtion variables to use the named tuple, as well (V3?)
     # registered_conversion_methods: ClassVar[dict[ConversionEngineTuple, ConversionMethod]] = {}
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        # Every concrete engine that declares its own `dataframe_type` is auto-registered here,
+        # as soon as its module is imported - no explicit setup() call required.
+        if "dataframe_type" in cls.__dict__:
+            Engine.registered_engines_by_dataframe_type[cls.dataframe_type] = cls
+
+    @classmethod
+    def get_engine_for_dataframe_type(cls, dataframe_type: type[Any]) -> type["Engine"]:
+        """aigen_start
+        Look up which registered Engine subclass is responsible for the given native dataframe type.
+        aigen_end"""
+        try:
+            return cls.registered_engines_by_dataframe_type[dataframe_type]
+        except KeyError as e:
+            qualified_name = f"{dataframe_type.__module__}.{dataframe_type.__qualname__}"
+            raise ProgrammingError(
+                f"No engine is registered for dataframe type '{qualified_name}'. "
+                "Make sure the corresponding engine plugin has been imported."
+            ) from e
 
     @classmethod
     def register_data_type(cls, data_type: DataType, engine_type: EngineSpecificDataType | type[Any]):
@@ -145,7 +168,7 @@ class Engine(BaseModel):
     @abstractmethod
     def convert_to_arrow(
         cls, schema: Schema, data_frame_wrapper: "DataFrameWrapper"
-    ) -> "TypedDataFrameWrapper[ArrowEngine]":
+    ) -> "TypedDataFrameWrapper[pa.Table]":
         """Converts the engine specific dataframe wrapper to an arrow object"""
 
     @classmethod
@@ -161,7 +184,7 @@ class Engine(BaseModel):
     @classmethod
     @abstractmethod
     def convert_from_arrow(
-        cls, schema: Schema, data_frame_wrapper: "TypedDataFrameWrapper[ArrowEngine]"
+        cls, schema: Schema, data_frame_wrapper: "TypedDataFrameWrapper[pa.Table]"
     ) -> "DataFrameWrapper":
         """Converts the engine specific dataframe wrapper from an arrow dataframe wrapper"""
 

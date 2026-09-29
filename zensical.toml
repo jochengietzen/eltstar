@@ -47,10 +47,29 @@ repo_name = "jochengietzen/eltstar"
 # can be defined using TOML syntax.
 #
 # Read more: https://zensical.org/docs/setup/navigation/
-# nav = [
-#   { "Get started" = "index.md" },
-#   { "Markdown in 5min" = "markdown.md" },
-# ]
+nav = [
+  { "Get started" = "index.md" },
+  { "Markdown in 5min" = "markdown.md" },
+  { "eltstar" = [
+    "eltstar/README.md",
+    { "Core Concepts" = [
+      "eltstar/core_concepts/README.md",
+      "eltstar/core_concepts/model_driven.md",
+      "eltstar/core_concepts/transformations.md",
+      "eltstar/core_concepts/data_frame_wrapper.md",
+      "eltstar/core_concepts/configuration.md",
+      "eltstar/core_concepts/running_a_pipeline.md",
+    ] },
+    { "Advanced Concepts" = [
+      "eltstar/advanced_concepts/README.md",
+      "eltstar/advanced_concepts/wrapper_functions.md",
+      "eltstar/advanced_concepts/engines.md",
+      "eltstar/advanced_concepts/lineage.md",
+      "eltstar/advanced_concepts/testing_and_fake_data.md",
+      "eltstar/advanced_concepts/runtime_systems.md",
+    ] },
+  ] },
+]
 
 # With the "extra_css" option you can add your own CSS styling to customize
 # your Zensical project according to your needs. You can add any number of
@@ -348,6 +367,15 @@ pygments_lang_class = true
 [project.markdown_extensions.pymdownx.magiclink]
 [project.markdown_extensions.pymdownx.mark]
 [project.markdown_extensions.pymdownx.smartsymbols]
+# aigen_start
+[project.markdown_extensions.pymdownx.snippets]
+# Enables embedding code straight from examples/ and src/ into the docs via
+# "--8<--" includes, so documented code stays in sync with the real thing.
+# https://zensical.org/docs/setup/extensions/#snippets
+base_path = ["."]
+check_paths = true
+dedent_subsections = true
+# aigen_end
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [
   { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }

@@ -1,4 +1,5 @@
 import importlib
+import importlib.util
 import inspect
 import pkgutil
 from collections.abc import Callable
@@ -136,7 +137,10 @@ class TransformationManager:
         for loader, sub_module_name, _ in pkgutil.walk_packages(path=transformation_package.__path__):
             spec = loader.find_spec(sub_module_name)  # type: ignore
             mod = importlib.util.module_from_spec(spec)  # type: ignore
-            spec.loader.exec_module(mod)  # type: ignore
+            try:
+                spec.loader.exec_module(mod)  # type: ignore
+            except Exception as e:
+                raise ImportError(f"Failed to load transformation module '{sub_module_name}': {e}") from e
 
     def _check_initialization_state(self) -> None:
         missing_init: list[str] = []
@@ -152,10 +156,13 @@ class TransformationManager:
         self,
         output_table_model: Table,
         name_: str | None = None,
+        graph_label: str = "default",
         **kwargs: Any,
     ) -> Callable:
         """aigen_start
         Decorator factory that registers a function as a named transformation with its input/output table models.
+        `graph_label` is forwarded to the resulting Transformation, so several independent pipelines registered
+        on the same manager can be told apart in the lineage graph.
         aigen_end"""
 
         def decorator(func: Callable) -> Callable:
@@ -236,6 +243,7 @@ class TransformationManager:
                 output_table_model=output_table_model,
                 runtime_config=self._runtime_config,
                 environment_config=self._environment_config,
+                graph_label=graph_label,
             )
 
             self._registered_transformations[func_name] = transformation
@@ -256,14 +264,38 @@ class TransformationManager:
         aigen_end"""
         plugin_groups = [
             "eltstar.engines",
-            "eltstar.conversions",
             "eltstar.runtime_systems",
         ]
+        errors: list[Exception] = []
         for group in plugin_groups:
             logger.info("Loading plugin group: %s", group)
             for ep in entry_points(group=group):
                 logger.info("Loading entry point: %s", ep)
-                ep.load()
+                try:
+                    ep.load()
+                except Exception as e:  # pylint: disable=broad-except
+                    logger.error("Failed to load plugin entry point '%s' in group '%s': %s", ep, group, e)
+                    errors.append(e)
+        if errors:
+            raise ExceptionGroup("Failed to load one or more eltstar plugins", errors)
+
+    def execute_all_transformations(self) -> None:
+        """aigen_start
+        Execute every registered transformation, in lineage dependency order, and write its output table.
+        aigen_end"""
+        self._check_initialization_state()
+        runtime_config: RuntimeConfig = self._runtime_config  # type: ignore
+        environment_config: EnvironmentConfig = self._environment_config  # type: ignore
+        for element in self.lineage.iter_transformations():
+            logger.info("Executing function %s", element.name)
+            transformation = element.transformation
+            result = transformation.execute()
+            result_model = transformation.output_table_model
+            result_model.write(
+                runtime_config=runtime_config,
+                environment_config=environment_config,
+                data_frame_wrapper=result,
+            )
 
 
 manager = TransformationManager()

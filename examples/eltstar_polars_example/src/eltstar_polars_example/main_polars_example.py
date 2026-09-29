@@ -10,4 +10,8 @@ if __name__ == "__main__":
     print(result.data_frame)
     manager._registered_transformations["youtube_channel_overview"].save_output_table(result=result)
 
+    ### aigen_start
+    # --8<-- [start:rs-usage]
     DatabricksAssetBundleJobRS().generate(lineage=manager.lineage)
+    # --8<-- [end:rs-usage]
+    ### aigen_end

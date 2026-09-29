@@ -7,7 +7,11 @@ from eltstar_pandas_example.config import MyEnvironmentConfig, MyRuntimeConfig
 FILE_PARTS = __file__.split(os.sep)
 ROOT = Path(os.sep.join(FILE_PARTS[: FILE_PARTS.index("examples")])).absolute()
 
+### aigen_start
+# --8<-- [start:load-plugins]
 manager.load_all_plugins()
+# --8<-- [end:load-plugins]
+### aigen_end
 
 manager.load_runtime_config(runtime_class_type=MyRuntimeConfig, situation_identifier="local")
 manager.load_environment_config(
@@ -17,4 +21,8 @@ manager.load_environment_config(
 )
 
 
+### aigen_start
+# --8<-- [start:load-all-transformations]
 manager.load_all_transformations("eltstar_pandas_example.transformations")
+# --8<-- [end:load-all-transformations]
+### aigen_end
