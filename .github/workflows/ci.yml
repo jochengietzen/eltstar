@@ -24,7 +24,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-            uv sync --all-groups
+            uv sync --all-groups --all-packages
 
       - name: Run style & code checks
         run: |
@@ -32,9 +32,8 @@ jobs:
       
       - name: Run all examples
         run: |
-          just create_sub_venvs
           python scripts/run_examples.py
-  
+
   unit-tests:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -64,8 +63,8 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-            uv sync --all-groups
+            uv sync --all-groups --all-packages
 
-      - name: Run unit-tests
+      - name: Run all unit-tests
         run: |
             just unit-tests

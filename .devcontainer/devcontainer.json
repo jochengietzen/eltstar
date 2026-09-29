@@ -18,7 +18,7 @@
             "configureZshAsDefaultShell": true,
             "installOhMyZsh": true,
             "installOhMyZshConfig": true,
-            "upgradePackages": true,
+            "upgradePackages": false,
             "nonFreePackages": false
         }
     },
@@ -137,8 +137,7 @@
                 "ms-toolsai.jupyter",
                 "ms-toolsai.vscode-jupyter-cell-tags",
                 "ms-toolsai.jupyter-keymap",
-                "ms-toolsai.vscode-jupyter-slideshow",
-                "teticio.python-envy"
+                "ms-toolsai.vscode-jupyter-slideshow"
             ]
         }
     }

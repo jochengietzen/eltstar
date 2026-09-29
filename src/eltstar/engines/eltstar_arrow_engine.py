@@ -64,6 +64,10 @@ class ArrowEngine(Engine):
         )
 
     @classmethod
+    def get_engine_schema(cls, data_frame_wrapper: DataFrameWrapper) -> pa.Schema:
+        return data_frame_wrapper.data_frame.schema
+
+    @classmethod
     def cast(cls, schema: Schema, data_frame_wrapper: DataFrameWrapper) -> DataFrameWrapper:
         data_frame: pa.Table = data_frame_wrapper.data_frame
         return data_frame_wrapper.create_with_new_data(

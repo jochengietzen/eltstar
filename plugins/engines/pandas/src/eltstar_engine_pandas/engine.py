@@ -2,6 +2,7 @@ from typing import Any, ClassVar, TypeGuard
 
 import pandas as pd
 import pyarrow as pa
+from pandas.io.json._table_schema import build_table_schema
 
 from eltstar.engines.base import Engine, EngineSpecificDataType
 from eltstar.engines.eltstar_arrow_engine import ArrowEngine
@@ -49,6 +50,25 @@ class PandasEngine(Engine):
             .engine_type()
             for schema_field in schema.root
         }
+
+    @classmethod
+    def get_engine_schema(cls, data_frame_wrapper: DataFrameWrapper) -> dict[Any, Any]:
+        value_mappings = {
+            "integer": "int",
+            "string": "str",
+            "boolean": "bool",
+            "number": "float",
+        }
+        data_frame = data_frame_wrapper.data_frame
+        schema = {}
+        for field in build_table_schema(data_frame)["fields"]:
+            if field["name"] == "index":
+                continue
+            if field["type"] == "datetime":
+                schema[field["name"]] = str(data_frame[field["name"]].dtype)
+            else:
+                schema[field["name"]] = value_mappings.get(field["type"], field["type"])
+        return schema
 
     @classmethod
     def cast(cls, schema: Schema, data_frame_wrapper: DataFrameWrapper) -> DataFrameWrapper:
@@ -106,9 +126,7 @@ class PandasEngine(Engine):
         # We are using the string representation here as we couldn't manage to get it working with the actual dtype
         cls.register_data_type(
             data_type=IntegerType(),
-            engine_type=EngineSpecificDataType(
-                str_repr="int"
-            ),
+            engine_type=EngineSpecificDataType(str_repr="int"),
         )
         cls.register_data_type(
             data_type=FloatType(),
@@ -141,9 +159,7 @@ class PandasEngine(Engine):
             timestamp_type_seconds_utc.identifier = timestamp_type_seconds_utc.identifier.replace("_ns", "_" + base)
             cls.register_data_type(
                 data_type=timestamp_type_seconds_utc,
-                engine_type=EngineSpecificDataType(
-                    str_repr=f"datetime64[{base}, UTC]"
-                ),
+                engine_type=EngineSpecificDataType(str_repr=f"datetime64[{base}, UTC]"),
             )
         cls.register_data_type(
             data_type=DateType(),

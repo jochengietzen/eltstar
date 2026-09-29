@@ -14,6 +14,7 @@ from eltstar.models.base import (
     StringType,
     TimestampTypeSecondsNTZ,
     TimestampTypeSecondsUTC,
+    UUIDType,
 )
 from eltstar.models.data_frame_wrapper import DataFrameWrapper, TypedDataFrameWrapper
 from eltstar.models.schema import Schema, SchemaField
@@ -54,6 +55,10 @@ class PolarsEngine(Engine):
                 for schema_field in schema.root
             }
         )
+
+    @classmethod
+    def get_engine_schema(cls, data_frame_wrapper: DataFrameWrapper) -> pl.Schema:
+        return data_frame_wrapper.data_frame.schema
 
     @classmethod
     def cast(cls, schema: Schema, data_frame_wrapper: DataFrameWrapper) -> DataFrameWrapper:
@@ -148,11 +153,10 @@ class PolarsEngine(Engine):
                 dtype_class=pl.Decimal(precision=decimal_type28.precision, scale=decimal_type28.scale)
             ),
         )
-        # cls.register_data_type(
-        #     data_type=UUIDType(),
-        #         engine_type=EngineSpecificDataType(dtype_class=pl.String),
-        #     )
-        # )
+        cls.register_data_type(
+            data_type=UUIDType(),
+            engine_type=EngineSpecificDataType(dtype_class=pl.String),
+        )
 
 
 PolarsEngine.setup()

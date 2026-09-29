@@ -7,6 +7,7 @@ from eltstar.config import (
     EnvironmentConfigType,
     RuntimeConfigType,
 )
+from eltstar.exceptions import SchemaVerificationError
 from eltstar.models.column import Columns
 from eltstar.models.data_frame_wrapper.wrapper import DataFrameWrapper
 from eltstar.models.schema import Schema
@@ -62,7 +63,26 @@ class Table(BaseModel):
         return self.columns.get_schema(by_name=by_name)
 
     def _verify_schema(self, data_frame_wrapper: DataFrameWrapper) -> None:
-        pass
+        if data_frame_wrapper.engine is None:
+            raise RuntimeError("Cannot verify schema without engine on data frame wrapper!")
+        expected_eltstar_schema = self.columns.get_schema()
+        expected_schema = data_frame_wrapper.engine._to_engine_schema(schema=expected_eltstar_schema)  # pylint: disable=protected-access
+        actual_schema = data_frame_wrapper.engine.get_engine_schema(data_frame_wrapper)
+
+        base_msg = "of the given data frame does not comply with the expected schema for the table!"
+        if not data_frame_wrapper.engine.engine_schemas_equals(actual_schema, expected_schema):
+            raise SchemaVerificationError(
+                f"The schema {base_msg}\nActual: {actual_schema}\nExpected: {expected_schema}"
+            )
+
+        actual_eltstar_schema = data_frame_wrapper.schema
+        if actual_eltstar_schema is None:
+            return
+
+        if not expected_eltstar_schema.equals(actual_eltstar_schema, ignore_order=True):
+            raise SchemaVerificationError(
+                f"The eltstar schema {base_msg}\nActual: {actual_eltstar_schema}\nExpected: {expected_eltstar_schema}"
+            )
 
     def cast(self, data_frame_wrapper: DataFrameWrapper) -> DataFrameWrapper:
         """Convenience function to cast the dataframe into the actual table"""

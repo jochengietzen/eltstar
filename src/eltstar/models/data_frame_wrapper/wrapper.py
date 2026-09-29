@@ -1,7 +1,7 @@
 from importlib.metadata import entry_points
 from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, Optional, Protocol, TypeVar, Union
 
-from eltstar.exceptions import ProgrammingError, WrapperFunctionException
+from eltstar.exceptions import ProgrammingError, SchemaVerificationError, WrapperFunctionException
 from eltstar.logging import logger
 from eltstar.models.data_frame_wrapper.functions.base import WrapperArgSpec, WrapperFunctionSpec
 
@@ -39,17 +39,39 @@ class DataFrameWrapper:
     _loaded_plugins: ClassVar[bool] = False
 
     def __init__(
-        self, data_frame: Any, schema: Optional["Schema"] = None, engine: Union["Engine", type["Engine"]] | None = None
+        self,
+        data_frame: Any,
+        schema: Optional["Schema"] = None,
+        engine: Union["Engine", type["Engine"]] | None = None,
+        auto_verify_schema_if_given: bool = False,
     ) -> None:
         self.data_frame = data_frame
         self.schema = schema
         self.engine = engine
+        if auto_verify_schema_if_given and self.schema is not None and self.engine is not None:
+            self.verify_schema(raise_on_mismatch=True)
 
     def create_with_new_data(self, data_frame: Any) -> "DataFrameWrapper":
         """aigen_start
         Return a new DataFrameWrapper with updated data but the same schema and engine.
         aigen_end"""
         return DataFrameWrapper(data_frame=data_frame, schema=self.schema, engine=self.engine)
+
+    def verify_schema(self, raise_on_mismatch: bool = False) -> bool:
+        """Verifies the given data frame against the given schema"""
+        if self.engine is None:
+            raise RuntimeError("Cannot verify schema if no engine is set on DataFrameWrapper!")
+        if self.schema is None:
+            raise RuntimeError("Cannot verify schema if no schema is set on DataFrameWrapper!")
+        frame_schema = self.engine.get_engine_schema(self)
+        schema_as_engine_schema = self.schema.to_engine_schema(engine_identifier=self.engine.engine_identifier)
+        eqls = self.engine.engine_schemas_equals(schema_left=frame_schema, schema_right=schema_as_engine_schema)
+        if raise_on_mismatch and not eqls:
+            raise SchemaVerificationError(
+                "The Dataframe's schema does not comply with the DataFrameWrapper's schema!"
+                f"\nData Frame Schema: {frame_schema}\nGiven Schema in Wrapper: {schema_as_engine_schema}"
+            )
+        return eqls
 
     @classmethod
     def ensure_is_wrapper(

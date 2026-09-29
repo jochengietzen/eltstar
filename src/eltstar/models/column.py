@@ -1,8 +1,8 @@
 from typing import Any
 
-from pydantic import Field, RootModel, model_validator
+from pydantic import Field, model_validator
 
-from eltstar.base_model import BaseModel
+from eltstar.base_model import BaseModel, DictRootModel
 from eltstar.models.data_type import DataTypeType
 from eltstar.models.generation import Generation
 from eltstar.models.schema import Schema, SchemaField
@@ -23,7 +23,7 @@ class Column(BaseModel):
     is_nullable: bool = False
 
 
-class Columns(RootModel[dict[str, Column]]):
+class Columns(DictRootModel[str, Column]):
     @model_validator(mode="before")
     @classmethod
     def validate_keys(cls, value: Any) -> Any:

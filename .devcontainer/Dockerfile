@@ -17,7 +17,7 @@ COPY --from=uv --chown=root: /uv /uvx /bin/
 RUN rm -f /etc/apt/sources.list.d/yarn.list \
     && rm -f /usr/share/keyrings/yarnkey.gpg
 
-RUN apt-get update && apt-get install -y sudo
+RUN apt-get update && apt-get install --no-upgrade  -y sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 RUN pip install pipx

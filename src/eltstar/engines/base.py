@@ -2,9 +2,9 @@ from abc import abstractmethod
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, Protocol, Self, TypeVar
 
-from pydantic import RootModel, model_validator
+from pydantic import model_validator
 
-from eltstar.base_model import BaseModel
+from eltstar.base_model import BaseModel, DictRootModel
 from eltstar.exceptions import ProgrammingError
 from eltstar.models.data_type import DataType
 from eltstar.models.schema import Schema
@@ -64,7 +64,7 @@ class RegisteredTypeTuple(NamedTuple):
     engine_type: EngineSpecificDataType
 
 
-class RegisteredTypeLookup(RootModel[dict[str, RegisteredTypeTuple]]):
+class RegisteredTypeLookup(DictRootModel[str, RegisteredTypeTuple]):
     root: dict[str, RegisteredTypeTuple]
 
     @property
@@ -147,6 +147,16 @@ class Engine(BaseModel):
         cls, schema: Schema, data_frame_wrapper: "DataFrameWrapper"
     ) -> "TypedDataFrameWrapper[ArrowEngine]":
         """Converts the engine specific dataframe wrapper to an arrow object"""
+
+    @classmethod
+    @abstractmethod
+    def get_engine_schema(cls, data_frame_wrapper: "DataFrameWrapper") -> Any:
+        """Extracts the engine specific dataframe schema of a given data_frame_wrapper"""
+
+    @classmethod
+    def engine_schemas_equals(cls, schema_left: Any, schema_right: Any) -> bool:
+        """Returns true iff schemas are equal"""
+        return schema_left == schema_right
 
     @classmethod
     @abstractmethod

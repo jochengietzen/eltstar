@@ -31,6 +31,14 @@ repos:
         pass_filenames: false
         entry: python scripts/run_examples.py
         verbose: true
+      
+      - id: run_tests
+        name: run_tests
+        language: python
+        types: [ python ]
+        pass_filenames: false
+        entry: just unit-tests
+        verbose: true
 
       # - id: mypy
       #   name: mypy

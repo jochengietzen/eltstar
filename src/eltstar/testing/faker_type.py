@@ -1,3 +1,4 @@
+import datetime
 import json
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Any
@@ -86,3 +87,8 @@ class FakerIntType(FakerType):
 class FakerIDType(FakerType):
     def __call__(self, *, faker_: Faker, **kwds: Any) -> Any:
         return faker_.uuid4()
+
+
+class FakerTimestampTypeSecondsUTC(FakerType):
+    def __call__(self, *, faker_: Faker, **kwds: Any) -> Any:
+        return faker_.date_time(tzinfo=datetime.UTC)
