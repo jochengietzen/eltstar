@@ -29,5 +29,9 @@ def join(self: DataFrameWrapper, function_spec: PandasJoinArgSpec) -> DataFrameW
 
 
 DataFrameWrapper.register_wrapper_function(
-    engine=PandasEngine, func_spec=JoinFuncSpec(arg_spec=PandasJoinArgSpec), func=join
+    engine=PandasEngine,
+    func_spec=JoinFuncSpec[JoinArgSpec, PandasJoinArgSpec](
+        arg_spec=JoinArgSpec, tight_arg_spec=PandasJoinArgSpec
+    ),  # (11)!
+    func=join,
 )

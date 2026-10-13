@@ -26,6 +26,8 @@ def ordered_duplicate(self: DataFrameWrapper, function_spec: PandasOrderedDuplic
 
 DataFrameWrapper.register_wrapper_function(
     engine=PandasEngine,
-    func_spec=OrderedDuplicateFuncSpec(arg_spec=PandasOrderedDuplicateArgSpec),
+    func_spec=OrderedDuplicateFuncSpec(
+        arg_spec=OrderedDuplicateArgSpec, tight_arg_spec=PandasOrderedDuplicateArgSpec
+    ),
     func=ordered_duplicate,
 )

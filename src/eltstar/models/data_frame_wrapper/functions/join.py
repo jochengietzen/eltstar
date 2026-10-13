@@ -75,7 +75,9 @@ JoinArgSpecType = TypeVar("JoinArgSpecType", bound=JoinArgSpec)  # pylint: disab
 
 ### aigen_start
 # --8<-- [start:join-func-spec]
-class JoinFuncSpec(WrapperFunctionSpec[type[JoinArgSpecType]]):  # (1)!
+class JoinFuncSpec[WrapperArg: JoinArgSpec, TightWrapperArg: JoinArgSpec](
+    WrapperFunctionSpec[WrapperArg, TightWrapperArg]
+):  # (1)!
     func_name: str = "join"  # (2)!
 
 
