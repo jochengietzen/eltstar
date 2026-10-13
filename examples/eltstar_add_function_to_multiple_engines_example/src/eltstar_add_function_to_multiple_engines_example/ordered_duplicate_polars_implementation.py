@@ -26,6 +26,8 @@ def ordered_duplicate(self: DataFrameWrapper, function_spec: PolarsOrderedDuplic
 
 DataFrameWrapper.register_wrapper_function(
     engine=PolarsEngine,
-    func_spec=OrderedDuplicateFuncSpec(arg_spec=PolarsOrderedDuplicateArgSpec),
+    func_spec=OrderedDuplicateFuncSpec(
+        arg_spec=OrderedDuplicateArgSpec, tight_arg_spec=PolarsOrderedDuplicateArgSpec
+    ),
     func=ordered_duplicate,
 )

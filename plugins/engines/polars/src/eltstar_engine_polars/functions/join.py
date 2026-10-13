@@ -32,7 +32,9 @@ def join(self: DataFrameWrapper, function_spec: PolarsJoinArgSpec) -> DataFrameW
 
 DataFrameWrapper.register_wrapper_function(  # (9)!
     engine=PolarsEngine,  # (10)!
-    func_spec=JoinFuncSpec(arg_spec=PolarsJoinArgSpec),  # (11)!
+    func_spec=JoinFuncSpec[JoinArgSpec, PolarsJoinArgSpec](
+        arg_spec=JoinArgSpec, tight_arg_spec=PolarsJoinArgSpec
+    ),  # (11)!
     func=join,  # (12)!
 )
 # --8<-- [end:polars-join-implementation]

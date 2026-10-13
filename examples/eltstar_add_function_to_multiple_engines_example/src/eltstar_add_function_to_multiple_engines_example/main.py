@@ -6,6 +6,7 @@ from eltstar_engine_polars.engine import PolarsEngine
 from eltstar.logging import logger
 from eltstar.models.base import FloatType, IntegerType
 from eltstar.models.schema import Schema, SchemaField
+from eltstar_add_function_to_multiple_engines_example.ordered_duplicate_function_spec import OrderedDuplicateArgSpec
 from eltstar_add_function_to_multiple_engines_example.ordered_duplicate_pandas_implementation import (
     PandasOrderedDuplicateArgSpec,
 )
@@ -46,9 +47,17 @@ def main() -> None:
     polars_result = polars_wrapper.ordered_duplicate(
         function_spec=PolarsOrderedDuplicateArgSpec(n_duplications=1, index_column_name="index_column")
     )
+    pandas_result_broad = pandas_wrapper.ordered_duplicate(
+        function_spec=OrderedDuplicateArgSpec(n_duplications=1, index_column_name="index_column")
+    )
+    polars_result_broad = polars_wrapper.ordered_duplicate(
+        function_spec=OrderedDuplicateArgSpec(n_duplications=1, index_column_name="index_column")
+    )
 
     print(pandas_result.data_frame)
     print(polars_result.data_frame)
+    print(pandas_result_broad.data_frame)
+    print(polars_result_broad.data_frame)
 
 
 if __name__ == "__main__":

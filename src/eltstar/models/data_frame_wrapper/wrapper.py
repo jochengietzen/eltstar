@@ -20,8 +20,9 @@ class EngineSpecificFunctionKey(NamedTuple):
 
 
 class EngineSpecificFunctionValue(NamedTuple):
-    func_spec: WrapperFunctionSpec[Any]
-    func_args: WrapperArgSpec
+    func_spec: WrapperFunctionSpec[Any, Any]
+    func_args: type[WrapperArgSpec]
+    tight_func_args: type[WrapperArgSpec]
     func: WrapperFunctionProtocol
 
 
@@ -115,7 +116,7 @@ class DataFrameWrapper:
 
     @classmethod
     def _get_relevant_registered_wrapper_functions(
-        cls, func_spec: WrapperFunctionSpec[Any] | str
+        cls, func_spec: WrapperFunctionSpec[Any, Any] | str
     ) -> dict[str, EngineSpecificFunctionValue]:
         func_identifier = func_spec.func_name if isinstance(func_spec, WrapperFunctionSpec) else func_spec
         return {
@@ -126,7 +127,10 @@ class DataFrameWrapper:
 
     @classmethod
     def register_wrapper_function(
-        cls, engine: Union["Engine", type["Engine"]], func_spec: WrapperFunctionSpec[Any], func: WrapperFunctionProtocol
+        cls,
+        engine: Union["Engine", type["Engine"]],
+        func_spec: WrapperFunctionSpec[Any, Any],
+        func: WrapperFunctionProtocol,
     ):
         """
         Function to register a new DataFrameWrapper Function.
@@ -141,20 +145,30 @@ class DataFrameWrapper:
                 f"is already registered. You will overwrite it, with your own function!"
             )
         func_args = func_spec.arg_spec
+        tight_func_args = func_spec.tight_arg_spec
         logger.info("Registering function %s for engine %s", func_spec.func_name, engine.engine_identifier)
         cls.registered_wrapper_functions[func_key] = EngineSpecificFunctionValue(
-            func=func, func_spec=func_spec, func_args=func_args
+            func=func, func_spec=func_spec, func_args=func_args, tight_func_args=tight_func_args
         )
         exceptions: list[WrapperFunctionException] = []
         for engine_identifier, func_engine_value in cls._get_relevant_registered_wrapper_functions(
             func_spec=func_spec
         ).items():
-            if not isinstance(func_engine_value.func_args, type(func_args)):
+            if not issubclass(func_engine_value.tight_func_args, func_args):
                 exceptions.append(
                     WrapperFunctionException(
                         f"The function {func_spec.func_name} in the engine {engine_identifier} does "
                         "not adhere to the same function arguments, like the newly registered one!"
-                        " This cannot be the case, in order to ensure compatibility between engines!"
+                        " The tight arg spec must be a subclass of the broad arg spec "
+                        f"{func_args}, in order to ensure compatibility between engines!"
+                    )
+                )
+            if func_args is not func_engine_value.func_args:
+                exceptions.append(
+                    WrapperFunctionException(
+                        f"The function {func_spec.func_name} in the engine {engine_identifier} has a different broad "
+                        f"arg spec, compared to the newly registered one for engine {engine.engine_identifier}. The "
+                        f"already registered one is {func_engine_value.func_args} and the new one is {func_args}"
                     )
                 )
         if exceptions:
@@ -175,6 +189,28 @@ class DataFrameWrapper:
         return ret
 
     @classmethod
+    def _make_func(cls, captured_func_name, captured_engine_func_tuple):
+        def _func(self, *args, **kwargs):
+            logger.info(
+                "Executing function %s for engine %s",
+                captured_func_name,
+                captured_engine_func_tuple.engine_identifier,
+            )
+            if self.engine is None:
+                raise WrapperFunctionException(
+                    f"Can only execute function {captured_func_name} if wrapper is aware of its engine!"
+                )
+            func_to_execute = cls.registered_wrapper_functions[
+                EngineSpecificFunctionKey(
+                    func_name=captured_func_name,
+                    engine_identifier=self.engine.engine_identifier,
+                )
+            ].func
+            return func_to_execute(self, *args, **kwargs)
+
+        return _func
+
+    @classmethod
     def load_all_plugins(cls) -> None:
         """
         Method to load all eltstar wrapper_function plugins
@@ -188,30 +224,10 @@ class DataFrameWrapper:
             ep.load()
 
         for func_name, engine_func_tuple in cls._get_wrapper_functions_by_name().items():
-
-            def _make_func(captured_func_name, captured_engine_func_tuple):
-                def _func(self, *args, **kwargs):
-                    logger.info(
-                        "Executing function %s for engine %s",
-                        captured_func_name,
-                        captured_engine_func_tuple.engine_identifier,
-                    )
-                    if self.engine is None:
-                        raise WrapperFunctionException(
-                            f"Can only execute function {captured_func_name} if wrapper is aware of its engine!"
-                        )
-                    func_to_execute = cls.registered_wrapper_functions[
-                        EngineSpecificFunctionKey(
-                            func_name=captured_func_name,
-                            engine_identifier=self.engine.engine_identifier,
-                        )
-                    ].func
-                    return func_to_execute(self, *args, **kwargs)
-
-                return _func
-
             setattr(
-                cls, func_name, _make_func(captured_func_name=func_name, captured_engine_func_tuple=engine_func_tuple)
+                cls,
+                func_name,
+                cls._make_func(captured_func_name=func_name, captured_engine_func_tuple=engine_func_tuple),
             )
 
         cls._loaded_plugins = True
