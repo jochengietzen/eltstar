@@ -1,10 +1,11 @@
-from eltstar.logging import logger
 from eltstar_rs_dbx_asset_bundle_jobs.runtime_system import DatabricksAssetBundleJobRS
 
+from eltstar.logging import logger
 from eltstar_polars_example.manager import manager
 
-
 if __name__ == "__main__":
+    logger.setup_stdout_handler()
+    logger.set_level("DEBUG")
     logger.debug("Registered transformations: %s", manager._registered_transformations.keys())
     result = manager._registered_transformations["youtube_channel_overview"].execute()
     print(result.data_frame)
