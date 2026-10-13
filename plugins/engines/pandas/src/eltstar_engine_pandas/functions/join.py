@@ -32,6 +32,6 @@ DataFrameWrapper.register_wrapper_function(
     engine=PandasEngine,
     func_spec=JoinFuncSpec[JoinArgSpec, PandasJoinArgSpec](
         arg_spec=JoinArgSpec, tight_arg_spec=PandasJoinArgSpec
-    ),  # (11)!
+    ),
     func=join,
 )
