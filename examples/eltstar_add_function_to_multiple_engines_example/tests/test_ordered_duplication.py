@@ -14,6 +14,8 @@ from eltstar.testing.wrapper_functions import compare_wrapper_functions_accross_
 
 
 def test_ordered_duplication_function(test_df):
+    ### aigen_start
+    # --8<-- [start:compare-across-engines]
     compare_wrapper_functions_accross_engines(
         dfw=test_df,
         engine_func_spec_lookup={
@@ -29,6 +31,8 @@ def test_ordered_duplication_function(test_df):
             ]
         ),
     )
+    # --8<-- [end:compare-across-engines]
+    ### aigen_end
 
     with pytest.raises(AssertionError):
         compare_wrapper_functions_accross_engines(

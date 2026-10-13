@@ -82,12 +82,19 @@ class EltstarLogger:
         After all plugins are loaded the current log level is propagated to every
         handler they may have added, ensuring consistent level control.
         """
+        errors: list[Exception] = []
         for entry_point in entry_points(group="eltstar.logger"):
             self._logger.debug("Loading logger plugin: %s", entry_point.name)
-            plugin: LoggerPlugin = entry_point.load()
-            plugin(self._logger)
+            try:
+                plugin: LoggerPlugin = entry_point.load()
+                plugin(self._logger)
+            except Exception as e:  # pylint: disable=broad-except
+                self._logger.error("Failed to load logger plugin '%s': %s", entry_point.name, e)
+                errors.append(e)
         # Propagate the active level to handlers added by plugins.
         self.set_level(self._logger.level)
+        if errors:
+            raise ExceptionGroup("Failed to load one or more eltstar logger plugins", errors)
 
     # ------------------------------------------------------------------
     # Standard logging delegation

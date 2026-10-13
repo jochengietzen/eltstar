@@ -27,5 +27,9 @@ if __name__ == "__main__":
     print(df_2.data_frame)
 
     print(df_w.data_frame)
-    df_w = df_w.cast()
+    ### aigen_start
+    # --8<-- [start:cast]
+    df_w = df_w.cast()  # (1)!
+    # --8<-- [end:cast]
+    ### aigen_end
     print(df_w.data_frame)

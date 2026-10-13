@@ -26,6 +26,8 @@ FILE_PARTS = __file__.split(os.sep)
 ROOT = Path(os.sep.join(FILE_PARTS[: FILE_PARTS.index("examples")])).absolute()
 
 
+### aigen_start
+# --8<-- [start:table-path]
 class YoutubeTablePath(TablePath):
     date: str
     time: str
@@ -39,11 +41,15 @@ class YoutubeTablePath(TablePath):
         **kwargs: dict[str, Any],
     ) -> str:
         return str(ROOT / f"data/{environment_config.env}/{self.name}_{self.date}_{self.time}.csv")
+# --8<-- [end:table-path]
+### aigen_end
 
 
+### aigen_start
+# --8<-- [start:table]
 class YoutubeTable(Table):
-    path: YoutubeTablePath
-    engine: type[EngineType] = PolarsEngine
+    path: YoutubeTablePath  # (1)!
+    engine: type[EngineType] = PolarsEngine  # (2)!
 
     def read(
         self,
@@ -75,25 +81,29 @@ class YoutubeTable(Table):
             file=self.path.full_path(runtime_config=runtime_config, environment_config=environment_config),
             **kwargs,
         )
+# --8<-- [end:table]
+### aigen_end
 
 
+### aigen_start
+# --8<-- [start:tech-channels]
 class ReadTable(YoutubeTable):
     pass
 
 
 tech_channels = ReadTable(
     path=YoutubeTablePath(
-        name="youtube_tech_channels",
+        name="youtube_tech_channels",  # (1)!
         date="20251120",
         time="133753",
     ),
-    columns=Columns(
+    columns=Columns(  # (2)!
         root=dict(
-            channel_id=Column(
-                name="channel_id",
-                data_type=StringType(),
-                is_primary_key=True,
-                generation=Generation(faker_type=FakerStringType()),
+            channel_id=Column(  # (3)!
+                name="channel_id",  # (4)!
+                data_type=StringType(),  # (5)!
+                is_primary_key=True,  # (6)!
+                generation=Generation(faker_type=FakerStringType()),  # (7)!
             ),
             channel_name=Column(
                 name="channel_name",
@@ -139,6 +149,8 @@ tech_channels = ReadTable(
     ),
     description="Youtube tech channels",
 )
+# --8<-- [end:tech-channels]
+### aigen_end
 
 
 tech_videos = YoutubeTable(
