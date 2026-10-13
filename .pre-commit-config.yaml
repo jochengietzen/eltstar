@@ -4,13 +4,15 @@ repos:
       - id: print_statement
         name: Check that print is not in the source code
         types: [ python ]
-        entry: 'print\(.*\)'
+        exclude: '^examples/.*|^scripts/run_examples.py'
+        entry: '[^#]*print\(.*\)'
         language: pygrep
 
       - id: ruff_fmt
         name: ruff_fmt
         language: python
         types: [ python ]
+        pass_filenames: false
         entry: ruff format src/ tests/
         verbose: true
 
@@ -18,7 +20,24 @@ repos:
         name: ruff_check
         language: python
         types: [ python ]
-        entry: ruff check src/ tests/
+        pass_filenames: false
+        entry: ruff check --fix src/ tests/
+        verbose: true
+      
+      - id: run_examples
+        name: run_examples
+        language: python
+        types: [ python ]
+        pass_filenames: false
+        entry: python scripts/run_examples.py
+        verbose: true
+      
+      - id: run_tests
+        name: run_tests
+        language: python
+        types: [ python ]
+        pass_filenames: false
+        entry: just unit-tests
         verbose: true
 
       # - id: mypy
@@ -32,6 +51,7 @@ repos:
         name: pylint
         language: python
         types: [ python ]
+        pass_filenames: false
         entry: pylint src/ tests/
         verbose: true
 

@@ -1,0 +1,33 @@
+[project]
+name = "eltstar_polars_example"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [
+    {name = "Tim Bossenmaier", email="bossenti@posteo.de"},
+    {name = "Jochen Gietzen", email="jochen.gietzen@gmail.com"}
+]
+dependencies = [
+    "eltstar",
+    "eltstar-engine-pandas",
+    "eltstar-engine-polars",
+    "eltstar-rs-dbx-asset-bundle-jobs",
+    "pandas>=3.0.1",
+    "polars>=1.34.0",
+    "pytest>=9.0.2",
+    "tabulate>=0.10.0",
+]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+eltstar = { workspace = true }
+eltstar-engine-pandas = { workspace = true }
+eltstar-engine-polars = { workspace = true }
+eltstar-rs-dbx-asset-bundle-jobs = { workspace = true }
+
+[tool.uv.build-backend]
+module-name = ["eltstar_polars_example"]
+module-root = "src"

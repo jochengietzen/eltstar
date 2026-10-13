@@ -1,0 +1,20 @@
+[project]
+name = "eltstar-rs-dbx-asset-bundle-jobs"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    {name = "Tim Bossenmaier", email="bossenti@posteo.de"},
+    {name = "Jochen Gietzen", email="jochen.gietzen@gmail.com"}
+]
+requires-python = ">=3.13"
+dependencies = [
+    "eltstar",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.12,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+eltstar = { workspace = true }

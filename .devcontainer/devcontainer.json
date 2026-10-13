@@ -4,23 +4,39 @@
         "dockerfile": "./Dockerfile",
         "args": {}
     },
-    "remoteEnv": {},
+    "containerEnv": {
+        "PYTHONPATH": "/workspace/src:${containerEnv:PYTHONPATH}",
+        "VIRTUAL_ENV": "/workspace/.venv"
+    },
     "remoteUser": "vscode",
-    "postAttachCommand": "just init",
+    "containerUser": "vscode",
+    "postCreateCommand": "if [ \"$CI\" != true ]; then just init; fi",
+    "waitFor": "postCreateCommand",
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {
             "installZsh": true,
             "configureZshAsDefaultShell": true,
             "installOhMyZsh": true,
             "installOhMyZshConfig": true,
-            "upgradePackages": true,
+            "upgradePackages": false,
             "nonFreePackages": false
         }
     },
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
     "workspaceFolder": "/workspace",
     "mounts": [
-        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind"
+        {
+            "source": "${localEnv:HOME}${localEnv:USERPROFILE}/.ssh",
+            "target": "/tmp/.ssh",
+            "type": "bind",
+            "consistency": "cached"
+        },
+        {
+            "source": "${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig",
+            "target": "/tmp/.gitconfig",
+            "type": "bind",
+            "consistency": "cached"
+        }
     ],
     "customizations": {
         "vscode": {
@@ -39,7 +55,15 @@
                 "diffEditor.codeLens": true,
                 "search.useGlobalIgnoreFiles": true,
                 "files.autoSave": "afterDelay",
-                "editor.defaultFormatter": "ms-python.black-formatter",
+                "editor.defaultFormatter": "charliermarsh.ruff",
+                "[python]": {
+                    "editor.defaultFormatter": "charliermarsh.ruff",
+                    "editor.formatOnSave": true,
+                    "editor.codeActionsOnSave": {
+                        "source.fixAll": "explicit",
+                        "source.organizeImports": "explicit"
+                    }
+                },
                 "files.watcherExclude": {
                     "**/__pycache__/**": true
                 },
@@ -48,6 +72,8 @@
                 },
                 "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
                 "python.languageServer": "Pylance",
+                "python.terminal.activateEnvironment": true,
+                "python.terminal.activateEnvInCurrentTerminal": true,
                 // Linting
                 "pylint.interpreter": [
                     "/workspace/.venv/bin/python"
@@ -58,25 +84,37 @@
                 "mypy-type-checker.interpreter": [
                     "/workspace/.venv/bin/python"
                 ],
-                // Formatting
-                "black-formatter.args": [],
-                "black-formatter.interpreter": [
+                // Formatting with Ruff
+                "ruff.enable": true,
+                "ruff.organizeImports": true,
+                "ruff.fixAll": true,
+                "ruff.lint.enable": true,
+                "ruff.interpreter": [
                     "/workspace/.venv/bin/python"
                 ],
-                "isort.args": [
-                    "--profile",
-                    "black"
-                ],
-                "isort.interpreter": [
-                    "/workspace/.venv/bin/python"
+                "ruff.path": [
+                    "/workspace/.venv/bin/ruff"
                 ],
                 // Analysis
+                "python.analysis.extraPaths": [
+                    "/workspace/src"
+                ],
+                "python.analysis.include": [
+                    "src/**"
+                ],
+                "python.analysis.exclude": [
+                    "**/__pycache__",
+                    ".venv/**",
+                    ".git/**"
+                ],
+                "python.analysis.autoSearchPaths": true,
                 "python.analysis.autoFormatStrings": true,
                 "python.analysis.autoImportCompletions": true,
                 "python.analysis.completeFunctionParens": true,
                 "python.analysis.diagnosticMode": "workspace",
                 "python.analysis.inlayHints.callArgumentNames": "partial",
                 "python.analysis.typeCheckingMode": "strict",
+                "python.analysis.useLibraryCodeForTypes": true,
                 // Testing
                 "python.testing.pytestEnabled": true,
                 "python.testing.pytestPath": "/workspace/.venv/bin/pytest",
@@ -94,7 +132,12 @@
                 "ms-python.vscode-pylance",
                 "neptunedesign.vs-sequential-number",
                 "tamasfe.even-better-toml",
-                "pomdtr.excalidraw-editor"
+                "pomdtr.excalidraw-editor",
+                "charliermarsh.ruff",
+                "ms-toolsai.jupyter",
+                "ms-toolsai.vscode-jupyter-cell-tags",
+                "ms-toolsai.jupyter-keymap",
+                "ms-toolsai.vscode-jupyter-slideshow"
             ]
         }
     }

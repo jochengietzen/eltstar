@@ -1,0 +1,70 @@
+name: 'ci' 
+on:
+  pull_request:
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout (GitHub)
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.14"
+          python-version: ${{ matrix.python }}
+
+      - name: Install command runner
+        uses: taiki-e/install-action@just
+
+      - name: Install Python dependencies
+        run: |
+            uv sync --all-groups --all-packages
+
+      - name: Run style & code checks
+        run: |
+            just check
+      
+      - name: Run all examples
+        run: |
+          python scripts/run_examples.py
+
+  unit-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+          python: [ "3.13", "3.14" ]
+          os: [ 
+            ubuntu-latest, 
+            macos-latest, 
+            windows-latest 
+          ]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout (GitHub)
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.14"
+          python-version: ${{ matrix.python }}
+
+      - name: Install command runner
+        uses: taiki-e/install-action@just
+
+      - name: Install Python dependencies
+        run: |
+            uv sync --all-groups --all-packages
+
+      - name: Run all unit-tests
+        run: |
+            just unit-tests
