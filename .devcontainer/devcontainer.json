@@ -13,7 +13,7 @@
     "postCreateCommand": "if [ \"$CI\" != true ]; then just init; fi",
     "waitFor": "postCreateCommand",
     "features": {
-        "ghcr.io/devcontainers/features/common-utils:2": {
+        "ghcr.io/devcontainers/features/common-utils:2.7.1": {
             "installZsh": true,
             "configureZshAsDefaultShell": true,
             "installOhMyZsh": true,

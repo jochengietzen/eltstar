@@ -41,6 +41,8 @@ class YoutubeTablePath(TablePath):
         **kwargs: dict[str, Any],
     ) -> str:
         return str(ROOT / f"data/{environment_config.env}/{self.name}_{self.date}_{self.time}.csv")
+
+
 # --8<-- [end:table-path]
 ### aigen_end
 
@@ -81,6 +83,8 @@ class YoutubeTable(Table):
             file=self.path.full_path(runtime_config=runtime_config, environment_config=environment_config),
             **kwargs,
         )
+
+
 # --8<-- [end:table]
 ### aigen_end
 

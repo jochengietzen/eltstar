@@ -1,0 +1,77 @@
+foo:
+  bar:
+    tasks:
+    - depends_on: []
+      python_wheel_task:
+        entry_point: blub
+        named_parameters:
+          table_path:
+            date: '20251120'
+            name: youtube_tech_channels
+            time: '133753'
+        package_name: eltstar_polars_example
+        parameters: []
+      task_key: read_youtube_tech_channels
+    - depends_on: []
+      python_wheel_task:
+        entry_point: blub
+        named_parameters:
+          table_path:
+            date: '20251120'
+            name: youtube_tech_videos
+            time: '133004'
+        package_name: eltstar_polars_example
+        parameters: []
+      task_key: read_youtube_tech_videos
+    - depends_on: []
+      python_wheel_task:
+        entry_point: blub
+        named_parameters:
+          table_path: youtube_channel_overview
+        package_name: eltstar_polars_example
+        parameters: []
+      task_key: transform_youtube_channel_overview
+    - depends_on:
+      - task_key: transform_youtube_channel_overview
+      python_wheel_task:
+        entry_point: blub
+        named_parameters:
+          table_path: youtube_channel_overview_2
+        package_name: eltstar_polars_example
+        parameters: []
+      task_key: transform_youtube_channel_overview_2
+    - depends_on: []
+      python_wheel_task:
+        entry_point: blub
+        named_parameters:
+          table_path: youtube_channel_overview_3
+        package_name: eltstar_polars_example
+        parameters: []
+      task_key: transform_youtube_channel_overview_3
+    - depends_on:
+      - task_key: transform_youtube_channel_overview_2
+      python_wheel_task:
+        entry_point: blub
+        named_parameters:
+          table_path:
+            date: '1'
+            name: youtube_channels_overview_2
+            time: '2'
+        package_name: eltstar_polars_example
+        parameters: []
+      task_key: write_youtube_channels_overview_2
+    - depends_on:
+      - task_key: transform_youtube_channel_overview_3
+      python_wheel_task:
+        entry_point: blub
+        named_parameters:
+          table_path:
+            date: '1'
+            name: youtube_channels_overview_3
+            time: '2'
+        package_name: eltstar_polars_example
+        parameters: []
+      task_key: write_youtube_channels_overview_3
+resources:
+  bar:
+    tasks: []
