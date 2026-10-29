@@ -4,7 +4,7 @@ ARG UV_VERSION=0.8.12
 FROM ghcr.io/astral-sh/uv:$UV_VERSION AS uv
 
 
-FROM mcr.microsoft.com/vscode/devcontainers/python:3.13-bullseye
+FROM mcr.microsoft.com/devcontainers/python:3.13-bookworm
 
 ARG venv_path=/python_venv
 
