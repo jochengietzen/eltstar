@@ -16,7 +16,7 @@ The schema is used to define the structure of your data. It contains the name of
 
 # TODOS
     
-    - TODO: Build minimal exmaple for asset bundles! (V1)
+    - TODO: Build minimal exmaple for cron job! (V1)
     - TODO: Make sure, that primary key generates the most values in the FakerManager generation! (V1)
     - TODO: Provide Tests for Core libraries
     - TODO: Release Process! (V1)
@@ -29,6 +29,7 @@ The schema is used to define the structure of your data. It contains the name of
                     - Restrict number of commits per branch
     - TODO: CoAuthor Commits
 
+    - TODO: Cookicutter Templates! (V2)
     - TODO: Add SchemaStruct Class! (V2)
         - TODO: provide implementation for to_engine_type in SchemaStruct Class! (V2)
     - TODO: Generics in new style (V2)
