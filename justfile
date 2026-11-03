@@ -11,6 +11,8 @@ init_system_files:
     git config --global core.eol lf
     if [ -f /tmp/.zshrc ]; then cp /tmp/.zshrc /home/vscode/.zshrc; fi
 
+sync_all:
+    uv sync --all-groups --all-packages
 
 init: init_system_files
     #!/bin/zsh
