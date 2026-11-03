@@ -5,6 +5,7 @@ from eltstar_engine_polars.engine import PolarsEngine
 from eltstar.models.base import FloatType, IntegerType
 from eltstar.models.schema import Schema, SchemaField
 from eltstar.models.data_frame_wrapper.functions.join import JoinArgSpec
+
 ### aigen_start
 # --8<-- [start:join-usage-import]
 from eltstar.models.data_frame_wrapper.preloaded_wrapper import DataFrameWrapper  # (1)!

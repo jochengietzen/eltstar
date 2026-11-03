@@ -54,6 +54,7 @@ class LineageTransformationElement(NamedTuple):
     input_models: dict[str, "Table"]
     depends_on_transformations: list[str]
     transformation: "Transformation"
+    node: TransformationNode
 
 
 class Lineage:
@@ -130,6 +131,7 @@ class Lineage:
                         [n.transformation.name for n, _ in g.in_edges(node) if isinstance(n, TransformationNode)]
                     ),
                     transformation=node.transformation,
+                    node=node,
                 )
 
     def draw(self, graph: nx.MultiDiGraph | None = None):
