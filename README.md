@@ -16,7 +16,7 @@ The schema is used to define the structure of your data. It contains the name of
 
 # TODOS
     
-    - TODO: Build minimal exmaple for cron job! (V1)
+    - TODO: Build minimal exmaple for systemd job! (V1)
     - TODO: Make sure, that primary key generates the most values in the FakerManager generation! (V1)
     - TODO: Provide Tests for Core libraries
     - TODO: Release Process! (V1)
@@ -63,7 +63,6 @@ export EXAMPLE_NAME=<example_name>
 cd examples
 mkdir $EXAMPLE_NAME
 uv init --package --name $EXAMPLE_NAME --directory /workspace/examples/$EXAMPLE_NAME
-just create_missing_sub_venvs
 cd $EXAMPLE_NAME
 uv add --active eltstar
 ```
