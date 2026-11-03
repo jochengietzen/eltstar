@@ -10,3 +10,20 @@ updates:
    directory: "/"
    schedule:
      interval: weekly
+
+ - package-ecosystem: "github-actions"
+   directory: "/"
+   labels:
+    - "ci/cd"
+    - "dependencies"
+   schedule:
+      interval: "weekly"
+   commit-message:
+    prefix: "chore(deps): "
+
+ - package-ecosystem: "uv"
+   directory: "/"
+   labels:
+      - "dependencies"
+   schedule:
+    interval: "weekly"

@@ -1,0 +1,25 @@
+[project]
+name = "eltstar-custom-data-types-example"
+version = "0.1.0"
+description = "Example to demonstrate how to define and use custom data types"
+readme = "README.md"
+authors = [
+    { name = "Jochen Gietzen", email = "jochen.gietzen@gmail.com" },
+    {name = "Tim Bossenmaier", email="bossenti@posteo.de"},
+]
+requires-python = ">=3.13"
+dependencies = [
+    "eltstar",
+    "eltstar-engine-polars",
+]
+
+[project.scripts]
+eltstar-custom-data-types-example = "eltstar_custom_data_types_example:main"
+
+[build-system]
+requires = ["uv_build>=0.8.12,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+eltstar = { workspace = true }
+eltstar-engine-polars = { workspace = true }

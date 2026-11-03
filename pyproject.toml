@@ -1,5 +1,5 @@
 [project]
-name = "data-integration-and-transformation-library"
+name = "eltstar"
 version = "0.1.0"
 description = "A library that aims to simplify etl/elt generation for standard use cases"
 authors = [
@@ -8,16 +8,34 @@ authors = [
 ]
 license = "MIT"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 dependencies = [
+    "faker>=40.1.2",
     "networkx>=3.4.2",
+    "pyarrow>=23.0.1",
+    "pyarrow-stubs>=20.0.0.20251215",
     "pydantic>=2.11.5",
     "pyyaml>=6.0.2",
 ]
 
+[tool.uv]
+package = true
+
 [tool.uv.build-backend]
-module-name = "ditl"
+module-name = ["eltstar"]
 module-root = "src"
+
+[tool.uv.workspace]
+members = [
+    "examples/*",
+    "plugins/engines/*",
+    "plugins/runtime_systems/databricks/asset_bundle_jobs",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "plugins", "examples"]
+env = ["TZ=UTC"]
+addopts = "--cov=src --cov=plugins --cov=examples --cov-fail-under=0 --cov-report=term-missing:skip-covered --no-cov-on-fail"
 
 [tool.mypy]
 exclude = [
@@ -26,13 +44,21 @@ exclude = [
     '^three\.',
 ]
 
+[[tool.mypy.overrides]]
+module = [
+    "matplotlib.*"
+]
+follow_untyped_imports = true
+
+
 [tool.pylint.main]
 fail-under = 10
 ignore-patterns = ["^\\.#"]
 jobs = 1
 persistent = true
-py-version = "3.11"
-suggestion-mode = true
+py-version = "3.13"
+
+disable = ["fixme"]
 
 [tool.pylint.basic]
 argument-naming-style = "snake_case"
@@ -52,23 +78,71 @@ no-docstring-rgx = "^_"
 property-classes = ["abc.abstractproperty"]
 variable-naming-style = "snake_case"
 
+[tool.pylint.design]
+max-args = 7
+max-positional-arguments = 7
+
+[tool.pylint."tests/*"]
+disable = [
+    "missing-function-docstring",
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
 [tool.pylint."messages control"]
 disable = [
     "unused-argument",
     "missing-class-docstring",
     "missing-module-docstring",
+    "too-few-public-methods",
 ]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.ruff.lint.isort]
+known-first-party = ["eltstar", "examples"]
 
 [dependency-groups]
 dev = [
     "commitizen>=4.8.2",
+    "jupyter>=1.1.1",
     "mypy>=1.15.0",
     "pylint>=3.3.7",
     "pytest>=8.3.5",
+    "pytest-cov==6.2.1",
+    "pytest-env>=1.7.0",
     "ruff>=0.11.11",
 ]
+docs = [
+    "zensical>=0.0.37",
+]
 types = [
+    "types-networkx>=3.6.1.20260612",
     "types-pyyaml>=6.0.12.20250516",
 ]
-
-
